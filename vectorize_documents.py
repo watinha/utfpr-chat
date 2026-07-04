@@ -1,9 +1,10 @@
 import os, pickle
+from langchain_classic.retrievers import EnsembleRetriever
 from langchain_community.document_loaders import TextLoader
-from langchain_community.text_splitter import LatexTextSplitter
-from langchain_community.embeddings import OllamaEmbeddings
-from langchain_community.vectorstores import InMemoryVectorStore
-from langchain_community.retrievers import BM25Retriever, EnsembleRetriever
+from langchain_community.retrievers import BM25Retriever
+from langchain_core.vectorstores import InMemoryVectorStore
+from langchain_ollama import OllamaEmbeddings
+from langchain_text_splitters import LatexTextSplitter
 
 # List of .tex files
 tex_files = [
@@ -28,7 +29,7 @@ splitter = LatexTextSplitter(chunk_size=1000, chunk_overlap=200)
 split_docs = splitter.split_documents(all_docs)
 
 # Create embeddings
-embeddings = OllamaEmbeddings(model="llama3.2:3b")
+embeddings = OllamaEmbeddings(model="bge-m3")
 
 # Vector store
 vectorstore = InMemoryVectorStore.from_documents(split_docs, embeddings)
