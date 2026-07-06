@@ -45,7 +45,7 @@ ensemble_retriever = EnsembleRetriever(retrievers=[vector_retriever, bm25_retrie
 print("EnsembleRetriever created with vector and BM25 retrievers.")
 
 with open('ensemble_retriever.json', 'wt') as f:
-    f.write(dumps(ensemble_retriever)
+    f.write(dumps(ensemble_retriever))
     print("EnsembleRetriever saved to ensemble_retriever.json.")
 
 
