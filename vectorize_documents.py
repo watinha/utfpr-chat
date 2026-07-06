@@ -1,7 +1,8 @@
-import os, pickle
+import os
 from langchain_classic.retrievers import EnsembleRetriever
 from langchain_community.document_loaders import TextLoader
 from langchain_community.retrievers import BM25Retriever
+from langchain_core.load import dumps
 from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_ollama import OllamaEmbeddings
 from langchain_text_splitters import LatexTextSplitter
@@ -43,7 +44,8 @@ ensemble_retriever = EnsembleRetriever(retrievers=[vector_retriever, bm25_retrie
 
 print("EnsembleRetriever created with vector and BM25 retrievers.")
 
-with open('ensemble_retriever.pkl', 'wb') as f:
-    pickle.dump(ensemble_retriever, f)
+with open('ensemble_retriever.json', 'wt') as f:
+    f.write(dumps(ensemble_retriever)
+    print("EnsembleRetriever saved to ensemble_retriever.json.")
 
-print("EnsembleRetriever saved to ensemble_retriever.pkl.")
+

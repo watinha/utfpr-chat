@@ -1,12 +1,13 @@
-import pickle
 from langchain_community.llms import Ollama
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains.retrieval import create_retrieval_chain
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.load import loads
+
 
 # Load the saved ensemble retriever
-with open('ensemble_retriever.pkl', 'rb') as f:
-    retriever = pickle.load(f)
+with open('ensemble_retriever.json', 'rb') as f:
+    retriever = loads(f.read())
 
 # Initialize Ollama LLM
 llm = Ollama(model="llama3.2:3b", temperature=0.1)
