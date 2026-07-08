@@ -26,4 +26,4 @@ RUN ollama serve & \
     python3 vectorize_documents.py
 
 # Simple initialization script
-CMD ["echo", "Hello from ollama"]
+ENTRYPOINT ["/bin/bash"]
