@@ -13,6 +13,7 @@ RUN apt-get update && \
 RUN pip3 install --no-cache-dir langchain langchain-community rank_bm25 langchain_ollama --break-system-packages
 
 COPY . /app
+COPY tex/*.tex /app/tex/
 
 # Download llama3.2 3B model
 RUN ollama serve & \
