@@ -1,5 +1,6 @@
 from rag_query import rag_query
 
+
 def main():
     print("Interactive RAG Chat. Type 'exit' to quit.")
     while True:
@@ -10,14 +11,12 @@ def main():
         answer, contexts = rag_query(question)
         print("Assistant:", answer)
         if contexts:
-            print("Context(s):")
-            if isinstance(contexts, list):
-                for doc in contexts:
+            with open('./contexts.log', 'wt') as f:
+                f.write('Contexts:\n\n')
+                for i, doc in enumerate(contexts):
                     meta = getattr(doc, 'metadata', {})
                     content = getattr(doc, 'page_content', str(doc))
-                    print(f"- [Metadata: {meta}]\n  Content: {content}")
-            else:
-                print(contexts)
+                    print(f"  - ({i}) [Metadata: {meta}]\n    Content: {content}\n")
         print('\n\n')
 
 if __name__ == "__main__":
