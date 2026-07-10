@@ -29,7 +29,28 @@ doc_chain = create_stuff_documents_chain(llm, prompt)
 # Create the retrieval chain
 rag_chain = create_retrieval_chain(retriever, doc_chain)
 
+
+def llm_classification(question: str):
+	prompt = ChatPromptTemplate.from_messages([
+		("system", prompt_data["classification"]),
+		("user", "{pergunta}")
+	])
+
+	chain_classificacao = prompt | llm | StrOutputParser()
+	resposta_bruta = chain_classificacao.invoke({"pergunta": pergunta_usuario})
+	decisao = resposta_bruta.strip().upper()
+
+	if "SIM" in decisao:
+		return True
+	else:
+		return False
+
+
 def rag_query(question: str):
+	in_scope = llm_classification(question)
+	if not in_scope:
+		return 'Essa pergunta não está no escopo das minhas atividades como assistente...'
+
     result = rag_chain.invoke({"input": question})
     return result['answer'], result.get('context', None)
 
