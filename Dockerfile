@@ -10,10 +10,12 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Install required Python packages
-RUN pip3 install --no-cache-dir langchain langchain-community rank_bm25 langchain_ollama --break-system-packages
+RUN pip3 install --no-cache-dir langchain langchain-community rank_bm25 langchain_ollama pylatexenc --break-system-packages
 
 COPY . /app
 COPY tex/*.tex /app/tex/
+
+RUN python3 clean_latex_tables.py
 
 # Download llama3.2 3B model
 RUN ollama serve & \
