@@ -7,10 +7,17 @@ def main():
         if question.strip().lower() in {"exit", "quit"}:
             print("Goodbye!")
             break
-        answer, context = rag_query(question)
+        answer, contexts = rag_query(question)
         print("Assistant:", answer)
-        if context:
-            print("Context:", context)
+        if contexts:
+            print("Context(s):")
+            if isinstance(contexts, list):
+                for doc in contexts:
+                    meta = getattr(doc, 'metadata', {})
+                    content = getattr(doc, 'page_content', str(doc))
+                    print(f"- [Metadata: {meta}]\n  Content: {content}")
+            else:
+                print(contexts)
         print('\n\n')
 
 if __name__ == "__main__":

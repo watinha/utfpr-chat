@@ -1,21 +1,26 @@
+import json
+
 from langchain_community.llms import Ollama
-from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain.chains.retrieval import create_retrieval_chain
+from langchain_classic.chains.combine_documents import create_stuff_documents_chain
+from langchain_classic.chains import create_retrieval_chain
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.load import loads
 
+from vectorize_documents import build_ensemble_retriever
 
-# Load the saved ensemble retriever
-with open('ensemble_retriever.json', 'rb') as f:
-    retriever = loads(f.read())
+
+# Load the ensemble retriever using the builder function
+retriever = build_ensemble_retriever()
 
 # Initialize Ollama LLM
 llm = Ollama(model="llama3.2:3b", temperature=0.1)
 
-# Create a prompt template for RAG with system and human messages
+with open('rag_prompt.txt', 'r', encoding='utf-8') as f:
+    prompt_data = json.load(f)
+
 prompt = ChatPromptTemplate.from_messages([
-    ("system", "Você é um assistente acadêmico especializado no curso de Ciências de Dados e Inteligência Artificial. Suas respostas devem ser baseadas estritamente no contexto fornecido e devem ser as mais precisas, claras e objetivas possível. Caso o contexto não contenha a resposta, afirme que não sabe a resposta."),
-    ("human", "Contexto:\n{context}\n\nPergunta: {input}\nResposta:")
+    ("system", prompt_data["system"]),
+    ("human", prompt_data["human"])
 ])
 
 # Create the document chain
@@ -25,8 +30,7 @@ doc_chain = create_stuff_documents_chain(llm, prompt)
 rag_chain = create_retrieval_chain(retriever, doc_chain)
 
 def rag_query(question: str):
-    """Query the retriever-augmented generation pipeline."""
-    result = rag_chain({"input": question})
+    result = rag_chain.invoke({"input": question})
     return result['answer'], result.get('context', None)
 
 if __name__ == "__main__":

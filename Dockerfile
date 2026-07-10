@@ -21,10 +21,5 @@ RUN ollama serve & \
     ollama pull llama3.2:3b && \
     ollama pull bge-m3
 
-# Generate retriever and vectorstore at build time
-RUN ollama serve & \
-    sleep 5 && \
-    python3 vectorize_documents.py
-
-# Simple initialization script
-ENTRYPOINT ["/bin/bash"]
+# Start Ollama server in the background and run main.py
+ENTRYPOINT ["/bin/bash", "-c", "ollama serve & sleep 5 && python3 main.py"]
