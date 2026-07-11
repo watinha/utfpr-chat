@@ -1,4 +1,5 @@
 from rag_query import rag_query
+from make_joke import make_joke
 
 
 def main():
@@ -17,6 +18,9 @@ def main():
                     meta = getattr(doc, 'metadata', {})
                     content = getattr(doc, 'page_content', str(doc))
                     print(f"  - ({i}) [Metadata: {meta}]\n    Content: {content}\n")
+        print('\n')
+        joke = make_joke(question)
+        print(f' - Joke: {joke}')
         print('\n\n')
 
 if __name__ == "__main__":

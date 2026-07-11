@@ -3,6 +3,7 @@ from langchain_classic.retrievers import EnsembleRetriever
 from langchain_classic.retrievers.multi_query import MultiQueryRetriever
 from langchain_community.document_loaders import TextLoader
 from langchain_community.retrievers import BM25Retriever
+from langchain_ollama import OllamaLLM
 from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_core.prompts.prompt import PromptTemplate
 from langchain_ollama import OllamaEmbeddings
@@ -27,7 +28,7 @@ def build_ensemble_retriever():
     bm25_retriever = BM25Retriever.from_documents(split_docs)
     ensemble_retriever = EnsembleRetriever(retrievers=[vector_retriever, bm25_retriever])
 
-    llm_retriever = Ollama(model="llama3.2:3b", temperature=0.1)
+    llm_retriever = OllamaLLM(model="llama3.2:3b", temperature=0.1)
     template_academico = """Você é um assistente acadêmico de Inteligência Artificial.
     Sua tarefa é ajudar a encontrar documentos oficiais do curso de Bacharelado em Ciência de Dados e IA.
     O usuário fará uma pergunta curta. Você deve gerar 3 versões diferentes dessa pergunta para melhorar a busca no banco de dados vetorial (que contém ementas, PPC e regulamentos).
@@ -45,8 +46,8 @@ def build_ensemble_retriever():
 
     # Inicializa o retriever passando o prompt customizado
     multiquery_retriever = MultiQueryRetriever.from_llm(
-        retriever=vectorstore.as_retriever(),
-        llm=llm,
+        retriever=ensemble_retriever,
+        llm=llm_retriever,
         prompt=prompt_expansao
     )
 
