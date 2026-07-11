@@ -72,7 +72,8 @@ def build_ensemble_retriever():
         prompt=prompt_expansao
     )
 
-    return multiquery_retriever
+    #return multiquery_retriever
+    return ensemble_retriever
 
 
 if __name__ == "__main__":

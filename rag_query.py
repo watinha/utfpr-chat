@@ -50,7 +50,7 @@ def llm_classification(question: str):
 def rag_query(question: str):
     in_scope = llm_classification(question)
     if not in_scope:
-        return 'Essa pergunta não está no escopo das minhas atividades como assistente...'
+        return 'Essa pergunta não está no escopo das minhas atividades como assistente...', []
 
     result = rag_chain.invoke({"input": question})
     return result['answer'], result.get('context', None)
