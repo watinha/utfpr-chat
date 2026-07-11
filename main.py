@@ -13,11 +13,13 @@ def main():
         print("Assistant:", answer)
         if contexts:
             with open('./contexts.log', 'wt') as f:
+                f.seek(0)
+                f.truncate()
                 f.write('Contexts:\n\n')
                 for i, doc in enumerate(contexts):
                     meta = getattr(doc, 'metadata', {})
                     content = getattr(doc, 'page_content', str(doc))
-                    print(f"  - ({i}) [Metadata: {meta}]\n    Content: {content}\n")
+                    f.write(f"  - ({i}) [Metadata: {meta}]\n    Content: {content}\n")
         print('\n')
         joke = make_joke(question)
         print(f' - Joke: {joke}')

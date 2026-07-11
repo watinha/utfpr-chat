@@ -1,4 +1,4 @@
-import os
+import os, pickle
 from langchain_classic.retrievers import EnsembleRetriever
 from langchain_classic.retrievers.multi_query import MultiQueryRetriever
 from langchain_community.document_loaders import TextLoader
@@ -23,9 +23,21 @@ def build_ensemble_retriever():
     split_docs = splitter.split_documents(all_docs)
 
     embeddings = OllamaEmbeddings(model="bge-m3")
-    vectorstore = InMemoryVectorStore.from_documents(split_docs, embeddings)
+    if os.path.exists('./retrievers/vectorstore.json'):
+        vectorstore = InMemoryVectorStore.load('./retrievers/vectorstore.json', embeddings)
+    else:
+        vectorstore = InMemoryVectorStore.from_documents(split_docs, embeddings)
+        vectorstore.dump('./retrievers/vectorstore.json')
     vector_retriever = vectorstore.as_retriever()
-    bm25_retriever = BM25Retriever.from_documents(split_docs)
+
+    if os.path.exists('./retrievers/bm25_retriever.pkl'):
+        with open('./retrievers/bm25_retriever.pkl', 'rb') as f:
+            bm25_retriever = pickle.load(f)
+    else:
+        bm25_retriever = BM25Retriever.from_documents(split_docs)
+        with open('./retrievers/bm25_retriever.pkl', 'wb') as f:
+            pickle.dump(bm25_retriever, f)
+
     ensemble_retriever = EnsembleRetriever(retrievers=[vector_retriever, bm25_retriever])
 
     llm_retriever = OllamaLLM(model="llama3.2:3b", temperature=0.1)

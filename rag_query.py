@@ -38,7 +38,7 @@ def llm_classification(question: str):
     ])
 
     chain_classificacao = prompt | llm | StrOutputParser()
-    resposta_bruta = chain_classificacao.invoke({"pergunta": pergunta_usuario})
+    resposta_bruta = chain_classificacao.invoke({"pergunta": question})
     decisao = resposta_bruta.strip().upper()
 
     if "SIM" in decisao:
