@@ -5,6 +5,7 @@ from langchain_classic.chains.combine_documents import create_stuff_documents_ch
 from langchain_classic.chains import create_retrieval_chain
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.load import loads
+from langchain_core.output_parsers import StrOutputParser
 
 from vectorize_documents import build_ensemble_retriever
 
