@@ -1,7 +1,7 @@
 import os, pickle
 from langchain_classic.retrievers import EnsembleRetriever
 from langchain_classic.retrievers.multi_query import MultiQueryRetriever
-from langchain_community.document_loaders import TextLoader
+from langchain_community.document_loaders.text import TextLoader
 from langchain_community.retrievers import BM25Retriever
 from langchain_ollama import OllamaLLM
 from langchain_core.vectorstores import InMemoryVectorStore
@@ -9,14 +9,23 @@ from langchain_core.prompts.prompt import PromptTemplate
 from langchain_ollama import OllamaEmbeddings
 from langchain_text_splitters import LatexTextSplitter
 
+from pylatexenc.latex2text import LatexNodes2Text
+
+
 def build_ensemble_retriever():
     tex_dir = './tex'
     tex_files = [os.path.join(tex_dir, f) for f in os.listdir(tex_dir) if f.endswith('.tex')]
+    conversor = LatexNodes2Text()
 
     all_docs = []
     for file_path in tex_files:
         loader = TextLoader(file_path)
         docs = loader.load()
+
+        if 'unidades-' in file_path:
+            for doc in docs:
+                doc.page_content = conversor.latex_to_text(doc.page_content)
+
         all_docs.extend(docs)
 
     splitter = LatexTextSplitter(chunk_size=1000, chunk_overlap=200)
@@ -66,3 +75,5 @@ def build_ensemble_retriever():
     return multiquery_retriever
 
 
+if __name__ == "__main__":
+    build_ensemble_retriever()

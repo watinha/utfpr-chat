@@ -21,7 +21,9 @@ WORKDIR /app
 COPY . /app
 COPY tex/*.tex /app/tex/
 
-RUN python3 clean_latex_tables.py
+RUN ollama serve & \
+    sleep 5 && \
+    python3 vectorize_documents.py
 
 # Start Ollama server in the background and run main.py
 ENTRYPOINT ["/bin/bash", "-c", "ollama serve & sleep 5 && python3 main.py"]
