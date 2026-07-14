@@ -1,6 +1,6 @@
 import json
 
-from langchain_ollama import OllamaLLM
+from rag import OllamaFactory
 from langchain_classic.chains.combine_documents import create_stuff_documents_chain
 from langchain_classic.chains import create_retrieval_chain
 from langchain_core.prompts import ChatPromptTemplate
@@ -13,8 +13,8 @@ from vectorize_documents import build_ensemble_retriever
 # Load the ensemble retriever using the builder function
 retriever = build_ensemble_retriever()
 
-# Initialize Ollama LLM
-llm = OllamaLLM(model="llama3.2:3b", temperature=0.1)
+# Initialize Ollama LLM via factory
+llm = OllamaFactory.get_llm(model="llama3.2:3b", temperature=0.1)
 
 with open('rag_prompt.txt', 'r', encoding='utf-8') as f:
     prompt_data = json.load(f)
