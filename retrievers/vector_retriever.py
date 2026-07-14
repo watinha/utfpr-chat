@@ -9,4 +9,4 @@ class VectorRetrieverBuilder:
         else:
             vectorstore = InMemoryVectorStore.from_documents(split_docs, embeddings)
             vectorstore.dump(store_path)
-        return vectorstore.as_retriever()
+        return vectorstore.as_retriever(search_kwargs={"k": 2})
