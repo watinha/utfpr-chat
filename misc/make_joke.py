@@ -15,5 +15,3 @@ def make_joke(question):
     chain_joke = prompt | llm | StrOutputParser()
     joke = chain_joke.invoke({ 'pergunta': question })
     return joke
-
-

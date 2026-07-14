@@ -1,5 +1,5 @@
-from rag_query import rag_query
-from make_joke import make_joke
+from rag import rag_query
+from misc import make_joke
 
 
 def main():

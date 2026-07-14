@@ -1,6 +1,7 @@
+import os
 import json
 
-from rag import OllamaFactory
+from .ollama_factory import OllamaFactory
 from langchain_classic.chains.combine_documents import create_stuff_documents_chain
 from langchain_classic.chains import create_retrieval_chain
 from langchain_core.prompts import ChatPromptTemplate
@@ -16,7 +17,11 @@ retriever = build_ensemble_retriever()
 # Initialize Ollama LLM via factory
 llm = OllamaFactory.get_llm(model="llama3.2:3b", temperature=0.1)
 
-with open('rag_prompt.txt', 'r', encoding='utf-8') as f:
+# Locate rag_prompt.txt relative to this module
+current_dir = os.path.dirname(os.path.abspath(__file__))
+prompt_path = os.path.join(current_dir, '../rag_prompt.txt')
+
+with open(prompt_path, 'r', encoding='utf-8') as f:
     prompt_data = json.load(f)
 
 prompt = ChatPromptTemplate.from_messages([
@@ -61,5 +66,3 @@ if __name__ == "__main__":
     print("Answer:", answer)
     if context:
         print("Context:", context)
-
-
