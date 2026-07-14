@@ -19,7 +19,7 @@ llm = OllamaFactory.get_llm(model="llama3.2:3b", temperature=0.1)
 
 # Locate rag_prompt.txt relative to this module
 current_dir = os.path.dirname(os.path.abspath(__file__))
-prompt_path = os.path.join(current_dir, '../rag_prompt.txt')
+prompt_path = os.path.join(current_dir, 'rag_prompt.txt')
 
 with open(prompt_path, 'r', encoding='utf-8') as f:
     prompt_data = json.load(f)
@@ -55,7 +55,13 @@ def llm_classification(question: str):
 def rag_query(question: str):
     in_scope = llm_classification(question)
     if not in_scope:
-        return 'Essa pergunta não está no escopo das minhas atividades como assistente...', []
+        prompt = ChatPromptTemplate.from_messages([
+            ("system", prompt_data["out_of_scope"]),
+            ("user", "{pergunta}")
+        ])
+        chain = prompt | llm | StrOutputParser()
+        resposta = chain.invoke({"pergunta": question})
+        return resposta, []
 
     result = rag_chain.invoke({"input": question})
     return result['answer'], result.get('context', None)
