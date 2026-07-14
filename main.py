@@ -1,5 +1,5 @@
 from rag import rag_query
-from misc import make_joke
+from misc import make_joke, make_invitation
 
 
 def main():
@@ -20,6 +20,9 @@ def main():
                     meta = getattr(doc, 'metadata', {})
                     content = getattr(doc, 'page_content', str(doc))
                     f.write(f"  - ({i}) [Metadata: {meta}]\n    Content: {content}\n")
+        print('\n')
+        invitation = make_invitation(answer)
+        print(f' - Invitation: {invitation}')
         print('\n')
         joke = make_joke(question)
         print(f' - Joke: {joke}')
