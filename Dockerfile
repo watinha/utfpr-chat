@@ -7,7 +7,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Install required Python packages
-RUN pip3 install --no-cache-dir langchain langchain-community rank_bm25 langchain_ollama pylatexenc --break-system-packages
+RUN pip3 install --no-cache-dir flask flask-pydantic pydantic langchain langchain-community rank_bm25 langchain_ollama pylatexenc --break-system-packages
 
 # Download llama3.2 3B model
 RUN ollama serve & \
@@ -25,5 +25,7 @@ RUN ollama serve & \
     sleep 5 && \
     python3 vectorize_documents.py
 
-# Start Ollama server in the background and run main.py
-ENTRYPOINT [""ollama", "serve"]
+EXPOSE 5000
+
+# Start Ollama server in the background and run server.py using the flask CLI
+ENTRYPOINT ["/bin/bash", "-c", "ollama serve & sleep 5 && flask --app server run --host=0.0.0.0 --port=5000"]
