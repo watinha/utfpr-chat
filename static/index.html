@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG UTFPR - Interface Simples</title>
+    <link rel="stylesheet" href="./style.css" />
+    <script src="marked.min.js"></script>
+</head>
+<body>
+
+    <header>
+      <img alt="Logo da Universidade Tecnológica do Paraná"
+           src="./logo-utfpr.png" class="logo" />
+        <h1>Assistente Acadêmico <span>| RAG Ciência de Dados e IA</span></h1>
+    </header>
+
+    <main id="chat-messages" class="chat-container">
+        <div id="chat-content" class="chat-content">
+            <!-- Dynamic chat messages will be inserted here -->
+
+        </div>
+    </main>
+
+    <footer class="input-area">
+        <div class="input-wrapper">
+            <div class="input-container">
+                <textarea id="chat-input" rows="1" placeholder="Pergunte sobre as ementas ou currículo..."></textarea>
+                <button id="send-btn" class="send-btn">
+                    <!-- Ícone de Envio SVG -->
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+            <div class="disclaimer">
+                A IA pode gerar informações imprecisas. Consulte sempre os documentos oficiais da UTFPR.
+            </div>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -4,7 +4,11 @@ from pydantic import BaseModel, Field
 from rag import rag_query
 from misc import make_joke, make_invitation
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static', static_url_path='')
+
+@app.route('/')
+def index():
+    return app.send_static_file('index.html')
 
 class QuestionQuery(BaseModel):
     question: str = Field(..., min_length=1)
