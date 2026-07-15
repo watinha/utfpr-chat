@@ -68,6 +68,99 @@ function createAiResponseHtml(answerText, sources = []) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize background canvas animation
+    function initAurora() {
+        const canvas = document.getElementById('bg-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        const count = 4;
+        const colors = [
+            'rgba(234, 179, 8, ',   // UTFPR Yellow-500 prefix
+            'rgba(245, 158, 11, ',  // UTFPR Amber-500 prefix
+            'rgba(253, 224, 71, ',  // UTFPR Yellow-300 prefix
+            'rgba(202, 138, 4, '    // UTFPR Dark Gold prefix
+        ];
+
+        const waveParams = [];
+        for (let i = 0; i < count; i++) {
+            waveParams.push({
+                pulseSpeed: 0.0008 + Math.random() * 0.001,
+                pulseOffset: Math.random() * Math.PI * 2,
+                baseOpacity: 0.05 + Math.random() * 0.04
+            });
+        }
+
+        let phase = 0;
+
+        function draw() {
+            const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+            bgGrad.addColorStop(0, '#0b0f19');
+            bgGrad.addColorStop(1, '#020617');
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.globalCompositeOperation = 'screen';
+            phase += 0.002;
+            const time = Date.now();
+
+            for (let i = 0; i < count; i++) {
+                ctx.beginPath();
+                
+                const p = waveParams[i];
+                const opacity = p.baseOpacity + (Math.sin(time * p.pulseSpeed + p.pulseOffset) * 0.03);
+                if (opacity <= 0) continue;
+
+                const colorBase = colors[i];
+                const colorStr = colorBase + opacity + ')';
+                const transparentStr = colorBase + '0)';
+
+                const gradient = ctx.createLinearGradient(0, 0, width, 0);
+                gradient.addColorStop(0, transparentStr);
+                gradient.addColorStop(0.5, colorStr);
+                gradient.addColorStop(1, transparentStr);
+                
+                ctx.strokeStyle = gradient;
+                ctx.lineWidth = height * 0.25;
+                ctx.lineCap = 'round';
+                ctx.shadowBlur = 80 * (opacity / 0.08);
+                ctx.shadowColor = colorStr;
+
+                for (let x = 0; x <= width; x += 10) {
+                    const angle1 = (x * 0.002) + phase + (i * 20);
+                    const angle2 = (x * 0.005) - phase * 0.5 + (i * 10);
+                    const y = (height * 0.28) + 
+                              Math.sin(angle1) * (height * 0.08) + 
+                              Math.cos(angle2) * (height * 0.04);
+                    
+                    if (x === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+                ctx.stroke();
+            }
+
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.shadowBlur = 0;
+
+            requestAnimationFrame(draw);
+        }
+
+        draw();
+    }
+
+    initAurora();
+
     const chatMessages = document.getElementById('chat-messages');
     const chatContent = document.getElementById('chat-content');
     const chatInput = document.getElementById('chat-input');
