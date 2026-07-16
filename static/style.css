@@ -7,8 +7,8 @@
     --bg-sources: #1e293b;
     --text-main: #f3f4f6;
     --text-muted: #9ca3af;
-    --accent-color: #6366f1;
-    --accent-hover: #4f46e5;
+    --accent-color: #f97316;
+    --accent-hover: #ea580c;
     --border-color: #374151;
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
@@ -16,22 +16,22 @@
 }
 
 * {
-    box-sizing: border-box;
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
 
 body {
-    font-family: var(--font-family);
     background-color: var(--bg-body);
     color: var(--text-main);
+    font-family: var(--font-family);
     display: flex;
     flex-direction: column;
     height: 100vh;
     overflow: hidden;
 }
 
-/* Scrollbar customizada */
+/* Scrollbar Styling */
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background-color: #d1d5db; border-radius: 4px; }
@@ -125,6 +125,7 @@ header h1 span {
     background-color: var(--bg-user-msg);
     border-top-right-radius: 0.25rem;
     max-width: 85%;
+    border: 1px solid rgba(249, 115, 22, 0.25);
 }
 
 .message.ai {
@@ -149,9 +150,9 @@ header h1 span {
 
 .message.ai .bubble {
     background-color: var(--bg-ai-msg);
-    border: 1px solid var(--border-color);
-    border-top-left-radius: 0.25rem;
-    flex: 1;
+    color: var(--text-main);
+    border-bottom-left-radius: 0.25rem;
+    border: 1px solid rgba(249, 115, 22, 0.25);
 }
 
 .bubble p { margin-bottom: 0.75rem; }
@@ -220,8 +221,8 @@ header h1 span {
 }
 
 .input-container:focus-within {
-    box-shadow: var(--shadow-md);
-    border-color: #a5b4fc;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2);
 }
 
 textarea {
@@ -300,8 +301,8 @@ textarea::placeholder { color: #9ca3af; }
     background: linear-gradient(
         90deg, 
         var(--bg-user-msg) 25%, 
-        rgba(99, 102, 241, 0.15) 45%, 
-        rgba(139, 92, 246, 0.15) 55%, 
+        rgba(249, 115, 22, 0.15) 45%, 
+        rgba(245, 158, 11, 0.15) 55%, 
         var(--bg-user-msg) 75%
     );
     background-size: 200% 100%;
