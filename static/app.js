@@ -237,6 +237,72 @@ document.addEventListener('DOMContentLoaded', () => {
             chatContent.insertAdjacentHTML('beforeend', aiMsgHtml);
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
+            // 5. Append invitation OR joke conditionally (mutually exclusive, 20% probability each)
+            const rand = Math.random();
+            let shouldGetInvitation = false;
+            let shouldGetJoke = false;
+
+            if (rand < 0.2) {
+                shouldGetInvitation = true;
+            } else if (rand < 0.4) {
+                shouldGetJoke = true;
+            }
+
+            if (shouldGetInvitation || shouldGetJoke) {
+                const aiBubble = chatContent.lastElementChild.querySelector('.bubble');
+                const extraContainerId = 'extra-' + Date.now();
+                
+                aiBubble.insertAdjacentHTML('beforeend', `
+                    <div id="${extraContainerId}" class="extra-responses" style="margin-top: 1rem; border-top: 1px dashed var(--border-color); padding-top: 0.75rem; display: flex; flex-direction: column; gap: 0.75rem;">
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">
+                            Pesquisando conteúdos adicionais...
+                        </div>
+                    </div>
+                `);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                let fetchPromise;
+                if (shouldGetInvitation) {
+                    fetchPromise = fetch(`/invitation?question=${encodeURIComponent(question)}`)
+                        .then(r => r.json())
+                        .then(invData => ({ type: 'invitation', text: invData.invitation }))
+                        .catch(() => null);
+                } else {
+                    fetchPromise = fetch(`/joke?question=${encodeURIComponent(question)}`)
+                        .then(r => r.json())
+                        .then(jokeData => ({ type: 'joke', text: jokeData.joke }))
+                        .catch(() => null);
+                }
+
+                fetchPromise.then(res => {
+                    const extraEl = document.getElementById(extraContainerId);
+                    if (!extraEl) return;
+
+                    extraEl.innerHTML = '';
+
+                    if (res && res.text) {
+                        if (res.type === 'invitation') {
+                            extraEl.insertAdjacentHTML('beforeend', `
+                                <div class="invitation-block" style="font-size: 0.875rem; background-color: rgba(234, 179, 8, 0.1); border: 1px solid rgba(234, 179, 8, 0.3); border-radius: 0.5rem; padding: 0.75rem; color: #fef08a;">
+                                    <strong style="display: block; margin-bottom: 0.25rem; color: #facc15;">✨ Convite do Assistente:</strong>
+                                    ${escapeHtml(res.text).replace(/\n/g, '<br>')}
+                                </div>
+                            `);
+                        } else if (res.type === 'joke') {
+                            extraEl.insertAdjacentHTML('beforeend', `
+                                <div class="joke-block" style="font-size: 0.875rem; background-color: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 0.5rem; padding: 0.75rem; color: #a7f3d0;">
+                                    <strong style="display: block; margin-bottom: 0.25rem; color: #34d399;">🎭 Uma piada para descontrair:</strong>
+                                    ${escapeHtml(res.text).replace(/\n/g, '<br>')}
+                                </div>
+                            `);
+                        }
+                    } else {
+                        extraEl.remove();
+                    }
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                });
+            }
+
         } catch (error) {
             console.error(error);
             const loadingEl = document.getElementById(loadingId);
