@@ -342,3 +342,61 @@ textarea::placeholder { color: #9ca3af; }
         transform: scale(0);
     }
 }
+
+/* Disabled States */
+.input-container.disabled {
+    background-color: rgba(17, 24, 39, 0.5);
+    border-color: var(--border-color);
+    box-shadow: none;
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+textarea:disabled {
+    cursor: not-allowed;
+}
+
+.send-btn:disabled {
+    background-color: var(--border-color);
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* Extra Responses Reveal Animations */
+.invitation-block {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+    animation: invitation-reveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.joke-block {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+    animation: joke-reveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes invitation-reveal {
+    0% {
+        opacity: 0;
+        transform: translateY(10px) scale(0.95);
+        box-shadow: 0 0 0 rgba(234, 179, 8, 0);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        box-shadow: 0 4px 15px rgba(234, 179, 8, 0.15);
+    }
+}
+
+@keyframes joke-reveal {
+    0% {
+        opacity: 0;
+        transform: translateY(10px) scale(0.95);
+        box-shadow: 0 0 0 rgba(16, 185, 129, 0);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15);
+    }
+}

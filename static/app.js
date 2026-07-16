@@ -10,6 +10,17 @@ function escapeHtml(text) {
 }
 
 /**
+ * Approximates token count by splitting on words and punctuation.
+ * @param {string} text Input text.
+ * @returns {number} Approximated token count.
+ */
+function countTokens(text) {
+    if (!text.trim()) return 0;
+    const matches = text.trim().match(/[\wÀ-ÿ]+|[^\s\wÀ-ÿ]/g);
+    return matches ? matches.length : 0;
+}
+
+/**
  * Generates the HTML structure of the user's question/prompt message.
  * @param {string} text The user question text.
  * @returns {string} The HTML string.
@@ -25,46 +36,84 @@ function createUserMessageHtml(text) {
 }
 
 /**
- * Generates the HTML structure of the AI's response message.
- * @param {string} answerText The main answer text returned by the system.
- * @param {Array<{name: string, page?: string|number}>} [sources=[]] Optional list of source documents used in RAG.
+ * Generates the HTML structure of the user's question, labeled as an example suggestion.
+ * @param {string} text The user question text.
  * @returns {string} The HTML string.
  */
-function createAiResponseHtml(answerText, sources = []) {
-    let sourcesHtml = '';
-    
+function createExampleUserMessageHtml(text) {
+    return `
+        <div class="message user">
+            <div class="bubble" style="border: 1px dashed rgba(249, 115, 22, 0.5);">
+                <span style="font-size: 0.75rem; color: var(--accent-color); display: block; margin-bottom: 0.25rem; font-weight: bold;">💡 Sugestão Automática</span>
+                ${escapeHtml(text)}
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Generates the HTML structure of an empty AI response message.
+ * @returns {string} The HTML string.
+ */
+function createEmptyAiResponseHtml() {
+    return `
+        <div class="message ai">
+            <div class="avatar">IA</div>
+            <div class="bubble"></div>
+        </div>
+    `;
+}
+
+/**
+ * Types out the AI response word-by-word with markdown rendering on the fly.
+ * @param {HTMLElement} bubbleElement The bubble element where text is rendered.
+ * @param {string} fullText The complete answer text.
+ * @param {Array<{name: string, page?: string|number}>} sources Optional list of source documents used in RAG.
+ * @param {HTMLElement} chatMessages Outer scrollable container to keep scrolling down.
+ * @returns {Promise<void>} Resolves when typing finishes.
+ */
+async function typeResponse(bubbleElement, fullText, sources, chatMessages) {
+    const textContainer = document.createElement('div');
+    textContainer.className = 'ai-text-content';
+    bubbleElement.appendChild(textContainer);
+
+    // Split text by spaces and punctuation to process word-by-word
+    const words = fullText.split(/(\s+)/);
+    let currentText = '';
+
+    for (let i = 0; i < words.length; i++) {
+        currentText += words[i];
+        
+        textContainer.innerHTML = typeof marked !== 'undefined' 
+            ? marked.parse(currentText) 
+            : `<p>${escapeHtml(currentText).replace(/\n/g, '<br>')}</p>`;
+        
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        await new Promise(resolve => setTimeout(resolve, 35)); // 35ms delay per word segment
+    }
+
+    // Append the sources block once the response typing completes
     if (sources && sources.length > 0) {
         const sourceTags = sources.map(src => {
             const pageSpan = src.page ? ` <span>Pág ${src.page}</span>` : '';
             return `<div class="source-tag">${escapeHtml(src.name)}${pageSpan}</div>`;
         }).join('\n                            ');
 
-        sourcesHtml = `
-                    <!-- Bloco de Fontes (RAG) -->
-                    <div class="sources-block">
-                        <div class="sources-title">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
-                            </svg>
-                            Fontes Consultadas
-                        </div>
-                        <div class="sources-list">
-                            ${sourceTags}
-                        </div>
-                    </div>`;
+        const sourcesHtml = `
+            <div class="sources-block">
+                <div class="sources-title">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
+                    </svg>
+                    Fontes Consultadas
+                </div>
+                <div class="sources-list">
+                    ${sourceTags}
+                </div>
+            </div>`;
+        bubbleElement.insertAdjacentHTML('beforeend', sourcesHtml);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
     }
-
-    const parsedHtml = typeof marked !== 'undefined' ? marked.parse(answerText) : `<p>${escapeHtml(answerText).replace(/\n/g, '<br>')}</p>`;
-
-    return `
-        <div class="message ai">
-            <div class="avatar">IA</div>
-            <div class="bubble">
-                ${parsedHtml}
-                ${sourcesHtml}
-            </div>
-        </div>
-    `;
 }
 
 /**
@@ -325,11 +374,124 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatContent = document.getElementById('chat-content');
     const chatInput = document.getElementById('chat-input');
     const sendBtn = document.getElementById('send-btn');
+    const tokenCounter = document.getElementById('token-counter');
+    const tokenCountSpan = document.getElementById('token-count');
 
-    // Auto-adjust height of textarea
+    let idleTimer;
+
+    // Reset inactivity timer
+    function resetIdleTimer() {
+        if (idleTimer) clearTimeout(idleTimer);
+        idleTimer = setTimeout(triggerIdleInvitation, 120000);
+    }
+
+    // Triggered automatically after 2 minutes of user inactivity
+    async function triggerIdleInvitation() {
+        if (chatInput.disabled) return;
+
+        const terms = [
+            "Qual a qualificação dos docentes?",
+            "Como é a infraestrutura do curso?",
+            "Quais as atividades profissionais exercidas pelo egresso do curso?",
+            "Qual o período do curso?",
+            "Matemática é um conteúdo importante para entrar no curso?",
+            "O curso tem Trabalho de Conclusão de Curso?"
+        ];
+        const chosenTerm = terms[Math.floor(Math.random() * terms.length)];
+
+        // Disable input interface during automated action
+        chatInput.disabled = true;
+        sendBtn.disabled = true;
+        const container = chatInput.closest('.input-container');
+        if (container) container.classList.add('disabled');
+
+        try {
+            // Clean up previous messages
+            await fadeAndRemovePreviousMessages(chatContent);
+
+            // 1. Show the suggestion query as if sent by user, labeled as automatic suggestion
+            const userMsgHtml = createExampleUserMessageHtml(chosenTerm);
+            chatContent.insertAdjacentHTML('beforeend', userMsgHtml);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // 2. Show loading indicator
+            const loadingId = 'loading-' + Date.now();
+            appendLoadingIndicator(chatContent, loadingId);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // 3. Concurrently fetch the answer response and the invitation message
+            const [answerData, invitationData] = await Promise.all([
+                fetchAnswer(chosenTerm),
+                fetchExtraContent(chosenTerm, 'invitation')
+            ]);
+
+            // Remove loading indicator
+            const loadingEl = document.getElementById(loadingId);
+            if (loadingEl) loadingEl.remove();
+
+            // Extract sources
+            const sources = (answerData.contexts || []).map(ctx => ({
+                name: ctx.metadata?.source || 'Documento',
+                page: ctx.metadata?.page || ''
+            }));
+
+            // 4. Render empty AI response bubble shell
+            const aiMsgHtml = createEmptyAiResponseHtml();
+            chatContent.insertAdjacentHTML('beforeend', aiMsgHtml);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            const aiBubbleElement = chatContent.lastElementChild.querySelector('.bubble');
+
+            // 5. Type RAG answer response word-by-word
+            await typeResponse(aiBubbleElement, answerData.answer, sources, chatMessages);
+
+            // 6. Append the invitation card
+            if (invitationData && invitationData.text) {
+                const extraContainerId = 'extra-' + Date.now();
+                aiBubbleElement.insertAdjacentHTML('beforeend', `
+                    <div id="${extraContainerId}" class="extra-responses" style="margin-top: 1rem; border-top: 1px dashed var(--border-color); padding-top: 0.75rem; display: flex; flex-direction: column; gap: 0.75rem;">
+                    </div>
+                `);
+                const extraEl = document.getElementById(extraContainerId);
+                appendExtraContentHtml(extraEl, invitationData);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+        } catch (err) {
+            console.error('Erro na query automática:', err);
+            renderErrorMessage(chatContent, chatMessages);
+        } finally {
+            chatInput.disabled = false;
+            sendBtn.disabled = false;
+            if (container) container.classList.remove('disabled');
+            chatInput.focus();
+            resetIdleTimer();
+        }
+    }
+
+    // Token count update and button validation
+    function updateTokenCount() {
+        const text = chatInput.value;
+        const tokens = countTokens(text);
+        tokenCountSpan.textContent = tokens;
+
+        if (tokens > 30) {
+            tokenCounter.style.color = '#ef4444';
+            sendBtn.disabled = true;
+        } else {
+            tokenCounter.style.color = 'var(--text-muted)';
+            if (!chatInput.disabled) {
+                sendBtn.disabled = text.trim() === '';
+            }
+        }
+    }
+
+    // Auto-adjust height of textarea and update tokens
     chatInput.addEventListener('input', () => {
         chatInput.style.height = 'auto';
         chatInput.style.height = (chatInput.scrollHeight) + 'px';
+        updateTokenCount();
+        resetIdleTimer();
     });
 
     // Core message flow coordinator
@@ -337,9 +499,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const question = chatInput.value.trim();
         if (!question) return;
 
+        // Prevent submission if token limit exceeded
+        const tokens = countTokens(question);
+        if (tokens > 30) return;
+
         // Clear input field and reset height
         chatInput.value = '';
         chatInput.style.height = 'auto';
+        updateTokenCount();
+
+        // Disable input elements and add visual disabled class
+        chatInput.disabled = true;
+        sendBtn.disabled = true;
+        const container = chatInput.closest('.input-container');
+        if (container) container.classList.add('disabled');
 
         // Clean up previous messages
         await fadeAndRemovePreviousMessages(chatContent);
@@ -368,13 +541,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 page: ctx.metadata?.page || ''
             }));
 
-            // 4. Render AI answer
-            const aiMsgHtml = createAiResponseHtml(data.answer, sources);
+            // 4. Render empty AI response bubble structure
+            const aiMsgHtml = createEmptyAiResponseHtml();
             chatContent.insertAdjacentHTML('beforeend', aiMsgHtml);
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
-            // 5. Append invitation OR joke conditionally
             const aiBubbleElement = chatContent.lastElementChild.querySelector('.bubble');
+
+            // 5. Type out response text word-by-word, followed by sources
+            await typeResponse(aiBubbleElement, data.answer, sources, chatMessages);
+
+            // 6. Append invitation OR joke conditionally
             handleAdditionalContent(question, aiBubbleElement, chatMessages);
 
         } catch (error) {
@@ -383,6 +560,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (loadingEl) loadingEl.remove();
 
             renderErrorMessage(chatContent, chatMessages);
+        } finally {
+            // Re-enable inputs
+            chatInput.disabled = false;
+            sendBtn.disabled = false;
+            if (container) container.classList.remove('disabled');
+            chatInput.focus();
+            resetIdleTimer();
         }
     }
 
@@ -394,4 +578,7 @@ document.addEventListener('DOMContentLoaded', () => {
             handleSend();
         }
     });
+
+    // Start initial idle timer
+    resetIdleTimer();
 });
