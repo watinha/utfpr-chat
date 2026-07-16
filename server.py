@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 from rag import rag_query
 from misc import make_joke, make_invitation
 
+
 app = Flask(__name__, static_folder='static', static_url_path='')
 
 @app.route('/')

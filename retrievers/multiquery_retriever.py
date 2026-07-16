@@ -10,7 +10,7 @@ class MultiQueryRetrieverBuilder:
     Sua tarefa é ajudar a encontrar documentos oficiais do curso de Bacharelado em Ciência de Dados e IA.
     O usuário fará uma pergunta curta. Você deve gerar 3 versões diferentes dessa pergunta para melhorar a busca no banco de dados vetorial (que contém ementas, PPC e regulamentos).
 
-    Use sinônimos acadêmicos adequados (ex: 'matéria' -> 'disciplina' ou 'unidade curricular', 'estágio' -> 'estágio supervisionado').
+    Use sinônimos acadêmicos adequados (ex: 'matéria' -> 'disciplina' ou 'unidade curricular', 'estágio' -> 'estágio supervisionado', 'horas' -> 'carga horária').
     Forneça apenas as perguntas, uma por linha.
 
     Pergunta Original: {question}

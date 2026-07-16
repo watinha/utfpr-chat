@@ -7,9 +7,12 @@ from langchain_classic.chains import create_retrieval_chain
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.load import loads
 from langchain_core.output_parsers import StrOutputParser
+from langchain_core.globals import set_debug
 
 from vectorize_documents import build_ensemble_retriever
 
+
+#set_debug(True)
 
 # Load the ensemble retriever using the builder function
 retriever = build_ensemble_retriever()
