@@ -185,13 +185,20 @@ document.addEventListener('DOMContentLoaded', () => {
         chatContent.insertAdjacentHTML('beforeend', userMsgHtml);
         chatMessages.scrollTop = chatMessages.scrollHeight;
 
-        // 2. Add temporary loading/typing indicator bubble
+        // 2. Add temporary loading/typing indicator bubble (Gemini-style skeleton shimmer)
         const loadingId = 'loading-' + Date.now();
         const loadingHtml = `
             <div id="${loadingId}" class="message ai">
                 <div class="avatar">IA</div>
-                <div class="bubble" style="color: var(--text-muted);">
-                    Digitando...
+                <div class="bubble" style="width: 100%;">
+                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <span>Pesquisando...</span>
+                    </div>
+                    <div class="skeleton-loader">
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line"></div>
+                    </div>
                 </div>
             </div>
         `;
