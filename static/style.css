@@ -325,3 +325,19 @@ textarea::placeholder { color: #9ca3af; }
         background-position: -200% 0;
     }
 }
+
+/* Animation for message removal */
+.message.fade-out {
+    animation: message-disappear 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes message-disappear {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0);
+    }
+}

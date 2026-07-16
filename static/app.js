@@ -180,6 +180,15 @@ document.addEventListener('DOMContentLoaded', () => {
         chatInput.value = '';
         chatInput.style.height = 'auto';
 
+        // Re-align to only show one Q&A at a time by fading out and removing previous messages
+        const existingMessages = Array.from(chatContent.querySelectorAll('.message'));
+        if (existingMessages.length > 0) {
+            existingMessages.forEach(msg => msg.classList.add('fade-out'));
+            // Wait for 1s transition to finish
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            existingMessages.forEach(msg => msg.remove());
+        }
+
         // 1. Add user question message
         const userMsgHtml = createUserMessageHtml(question);
         chatContent.insertAdjacentHTML('beforeend', userMsgHtml);
