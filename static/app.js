@@ -395,7 +395,10 @@ document.addEventListener('DOMContentLoaded', () => {
             "Quais as atividades profissionais exercidas pelo egresso do curso?",
             "Qual o período do curso?",
             "Matemática é um conteúdo importante para entrar no curso?",
-            "O curso tem Trabalho de Conclusão de Curso?"
+            "O curso tem Trabalho de Conclusão de Curso?",
+            "Como funcionam as atividades de extensão no curso?",
+            "O curso tem atividades complementares?",
+            "Qual a importância do estágio?"
         ];
         const chosenTerm = terms[Math.floor(Math.random() * terms.length)];
 
