@@ -52,19 +52,51 @@ def llm_classification(question: str):
         return False
 
 
+def semantic_routing_check(question: str, documents) -> bool:
+    """
+    Evaluates whether the retrieved documents contain sufficient information
+    to answer the user's question.
+    """
+    if not documents:
+        return False
+
+    context_text = "\n\n".join([doc.page_content for doc in documents])
+
+    prompt_router = ChatPromptTemplate.from_messages([
+        ("system", prompt_data["semantic_routing"]),
+        ("user", "Pergunta: {pergunta}")
+    ])
+
+    routing_chain = prompt_router | llm | StrOutputParser()
+    response = routing_chain.invoke({
+        "contexto": context_text,
+        "pergunta": question
+    })
+
+    decision = response.strip().upper()
+    return "SIM" in decision
+
+
 def rag_query(question: str):
-    in_scope = llm_classification(question)
+    # Retrieve documents from EnsembleRetriever
+    docs = retriever.invoke(question)
+
+    # Perform Semantic Routing check
+    in_scope = semantic_routing_check(question, docs)
+
     if not in_scope:
-        prompt = ChatPromptTemplate.from_messages([
+        prompt_out = ChatPromptTemplate.from_messages([
             ("system", prompt_data["out_of_scope"]),
             ("user", "{pergunta}")
         ])
-        chain = prompt | llm | StrOutputParser()
+        chain = prompt_out | llm | StrOutputParser()
         resposta = chain.invoke({"pergunta": question})
         return resposta, []
 
-    result = rag_chain.invoke({"input": question})
-    return result['answer'], result.get('context', None)
+    # Generate answer using document chain
+    result_answer = doc_chain.invoke({"input": question, "context": docs})
+    return result_answer, docs
+
 
 if __name__ == "__main__":
     question = input("Enter your question: ")
