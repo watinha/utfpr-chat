@@ -52,6 +52,14 @@ class TestRagQuery(unittest.TestCase):
                 "expected_words": ["atividades", "complementares", "horas", "grupo"]
             },
             {
+                "question": "Quais os conteúdos da disciplina de Estrutura de Dados 1?",
+                "expected_words": ["ementa", "listas", "lineares", "ordenação"]
+            },
+            {
+                "question": "Quais os conteúdos da disciplina de Estrutura de Dados 2?",
+                "expected_words": ["ementa", "árvores", "binárias", "complexidade"]
+            },
+            {
                 "question": "Qual a importância do estágio?",
                 "expected_words": ["estágio", "supervisionado", "profissional", "prática", "empresa"]
             }
