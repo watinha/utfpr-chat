@@ -382,6 +382,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Reset inactivity timer
     function resetIdleTimer() {
         if (idleTimer) clearTimeout(idleTimer);
+        // Do not start/run the timer if the application is loading a response
+        if (chatInput && chatInput.disabled) return;
         idleTimer = setTimeout(triggerIdleInvitation, 120000);
     }
 
@@ -505,6 +507,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Prevent submission if token limit exceeded
         const tokens = countTokens(question);
         if (tokens > 30) return;
+
+        // Clear running idle timer when request starts loading
+        if (idleTimer) clearTimeout(idleTimer);
 
         // Clear input field and reset height
         chatInput.value = '';
