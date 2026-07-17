@@ -3,8 +3,13 @@ import os
 from unittest import TestCase, main
 from unittest.mock import MagicMock
 
-# Add project root to path so we can import 'server' and mock dependencies
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+# Walk up directories to locate the project root containing server.py
+current_dir = os.path.dirname(os.path.abspath(__file__)) if __file__ else os.getcwd()
+while current_dir and current_dir != os.path.dirname(current_dir):
+    if os.path.exists(os.path.join(current_dir, 'server.py')):
+        sys.path.insert(0, current_dir)
+        break
+    current_dir = os.path.dirname(current_dir)
 
 # Create mocks for backend dependencies
 mock_rag = MagicMock()
@@ -26,8 +31,8 @@ class TestServerAPI(TestCase):
 
     def test_index_route(self):
         """Test that the index route is accessible."""
-        response = self.client.get('/')
-        self.assertIn(response.status_code, [200, 404])
+        with self.client.get('/') as response:
+            self.assertIn(response.status_code, [200, 404])
 
     def test_answer_route_success(self):
         """Test /answer endpoint with a valid query parameter."""
@@ -38,10 +43,10 @@ class TestServerAPI(TestCase):
         
         mock_rag.rag_query.return_value = ("Esta é a resposta simulada do RAG.", [mock_doc])
 
-        response = self.client.get('/answer?question=Qual%20o%20periodo%20do%20curso%3F')
-        self.assertEqual(response.status_code, 200)
+        with self.client.get('/answer?question=Qual%20o%20periodo%20do%20curso%3F') as response:
+            self.assertEqual(response.status_code, 200)
+            data = response.get_json()
         
-        data = response.get_json()
         self.assertEqual(data["answer"], "Esta é a resposta simulada do RAG.")
         self.assertEqual(len(data["contexts"]), 1)
         self.assertEqual(data["contexts"][0]["metadata"]["source"], "manual.txt")
@@ -52,22 +57,22 @@ class TestServerAPI(TestCase):
 
     def test_answer_route_missing_query(self):
         """Test /answer validation when question parameter is missing."""
-        response = self.client.get('/answer')
-        self.assertEqual(response.status_code, 400)
+        with self.client.get('/answer') as response:
+            self.assertEqual(response.status_code, 400)
 
     def test_answer_route_empty_query(self):
         """Test /answer validation when question parameter is empty."""
-        response = self.client.get('/answer?question=')
-        self.assertEqual(response.status_code, 400)
+        with self.client.get('/answer?question=') as response:
+            self.assertEqual(response.status_code, 400)
 
     def test_joke_route_success(self):
         """Test /joke endpoint with mock make_joke call."""
         mock_misc.make_joke.return_value = "Esta é uma piada sobre computação."
 
-        response = self.client.get('/joke?question=Me%20conte%20uma%20piada')
-        self.assertEqual(response.status_code, 200)
+        with self.client.get('/joke?question=Me%20conte%20uma%20piada') as response:
+            self.assertEqual(response.status_code, 200)
+            data = response.get_json()
         
-        data = response.get_json()
         self.assertEqual(data["joke"], "Esta é uma piada sobre computação.")
         mock_misc.make_joke.assert_called_once_with("Me conte uma piada")
 
@@ -76,10 +81,10 @@ class TestServerAPI(TestCase):
         mock_rag.rag_query.return_value = ("Resposta do RAG para convite.", [])
         mock_misc.make_invitation.return_value = "Venha estudar no curso de CDIA da UTFPR!"
 
-        response = self.client.get('/invitation?question=Quero%20visitar%20a%20universidade')
-        self.assertEqual(response.status_code, 200)
+        with self.client.get('/invitation?question=Quero%20visitar%20a%20universidade') as response:
+            self.assertEqual(response.status_code, 200)
+            data = response.get_json()
         
-        data = response.get_json()
         self.assertEqual(data["invitation"], "Venha estudar no curso de CDIA da UTFPR!")
         
         mock_rag.rag_query.assert_called_once_with("Quero visitar a universidade")
