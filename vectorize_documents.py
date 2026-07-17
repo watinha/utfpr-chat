@@ -11,8 +11,8 @@ from retrievers import (
 )
 
 
-CHUNK_SIZE=500
-CHUNK_OVERLAP=100
+CHUNK_SIZE=1000
+CHUNK_OVERLAP=200
 
 def build_ensemble_retriever():
     tex_dir = './tex'
