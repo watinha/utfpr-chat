@@ -11,6 +11,9 @@ from retrievers import (
 )
 
 
+CHUNK_SIZE=500
+CHUNK_OVERLAP=100
+
 def build_ensemble_retriever():
     tex_dir = './tex'
     tex_files = [os.path.join(tex_dir, f) for f in os.listdir(tex_dir) if f.endswith('.tex')]
@@ -27,7 +30,7 @@ def build_ensemble_retriever():
 
         all_docs.extend(docs)
 
-    splitter = LatexTextSplitter(chunk_size=1000, chunk_overlap=200)
+    splitter = LatexTextSplitter(chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP)
     split_docs = splitter.split_documents(all_docs)
 
     embeddings = OllamaFactory.get_embeddings(model="bge-m3")

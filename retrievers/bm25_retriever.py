@@ -12,5 +12,5 @@ class BM25RetrieverBuilder:
             bm25_retriever = BM25Retriever.from_documents(split_docs)
             with open(cache_path, 'wb') as f:
                 pickle.dump(bm25_retriever, f)
-        bm25_retriever.k = 2
+        bm25_retriever.k = 5
         return bm25_retriever
