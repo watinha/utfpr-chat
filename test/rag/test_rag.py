@@ -62,7 +62,15 @@ class TestRagQuery(unittest.TestCase):
             {
                 "question": "Qual a importância do estágio?",
                 "expected_words": ["estágio", "supervisionado", "profissional", "prática", "empresa"]
-            }
+            },
+            {
+                "question": "Qual a carga horária total do curso?",
+                "expected_words": ["3210", "horas"]
+            },
+            {
+                "question": "O curso possui disciplinas da área de humanidades?",
+                "expected_words": ["Sim", "Comunicação"]
+            },
         ]
 
         for case in example_questions:
