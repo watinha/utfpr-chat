@@ -151,7 +151,7 @@ header h1 span {
 .message.ai .bubble {
     background-color: var(--bg-ai-msg);
     color: var(--text-main);
-    border-bottom-left-radius: 0.25rem;
+    border-top-left-radius: 0.25rem;
     border: 1px solid rgba(249, 115, 22, 0.25);
 }
 
