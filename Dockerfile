@@ -7,7 +7,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Install required Python packages
-RUN pip3 install --no-cache-dir flask flask-pydantic pydantic langchain langchain-community rank_bm25 langchain_ollama pylatexenc faiss-cpu --break-system-packages
+RUN pip3 install --no-cache-dir flask flask-pydantic pydantic langchain langchain-community rank_bm25 langchain_ollama pylatexenc faiss-cpu unstructured[pdf] opencv-python-headless --break-system-packages
 
 # Download llama3.2 3B model
 RUN ollama serve & \

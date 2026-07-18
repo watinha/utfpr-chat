@@ -1,4 +1,4 @@
-from rag import OllamaFactory
+from llms import OllamaFactory
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 

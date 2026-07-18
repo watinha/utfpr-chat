@@ -1,4 +1,4 @@
-from rag.ollama_factory import OllamaFactory
+from llms import OllamaFactory
 
 from .vector_retriever import VectorRetrieverBuilder
 from .bm25_retriever import BM25RetrieverBuilder

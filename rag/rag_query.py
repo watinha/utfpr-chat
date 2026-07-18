@@ -1,7 +1,7 @@
 import os
 import json
 
-from .ollama_factory import OllamaFactory
+from llms import OllamaFactory
 from langchain_classic.chains.combine_documents import create_stuff_documents_chain
 from langchain_classic.chains import create_retrieval_chain
 from langchain_core.prompts import ChatPromptTemplate

@@ -1,6 +1,6 @@
 from langchain_classic.retrievers.multi_query import MultiQueryRetriever
 from langchain_core.prompts.prompt import PromptTemplate
-from rag import OllamaFactory
+from llms import OllamaFactory
 
 class MultiQueryRetrieverBuilder:
     @staticmethod

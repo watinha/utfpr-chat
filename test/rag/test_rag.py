@@ -71,6 +71,10 @@ class TestRagQuery(unittest.TestCase):
                 "question": "O curso possui disciplinas da área de humanidades?",
                 "expected_words": ["Sim", "Comunicação"]
             },
+            {
+                "question": "Quais são as disciplinas do primeiro período do curso?",
+                "expected_words": ["Introdução", "Ciência", "Dados", "Inteligência", "Artificial", "Algoritmos", "Extensionista"]
+            },
         ]
 
         for case in example_questions:
@@ -82,11 +86,11 @@ class TestRagQuery(unittest.TestCase):
                 self.assertIsInstance(answer, str)
                 self.assertTrue(len(answer.strip()) > 0, f"Empty RAG answer returned for: '{question}'")
                 
-                # Verify that at least one of the expected keywords is present in the LLM response
-                has_keyword = any(word.lower() in answer.lower() for word in case["expected_words"])
+                # Verify that all of the expected keywords are present in the LLM response
+                has_keywords = all(word.lower() in answer.lower() for word in case["expected_words"])
                 self.assertTrue(
-                    has_keyword, 
-                    f"RAG answer did not contain any of the expected topical keywords {case['expected_words']}.\nAnswer: '{answer}'"
+                    has_keywords, 
+                    f"RAG answer did not contain all of the expected topical keywords {case['expected_words']}.\nAnswer: '{answer}'"
                 )
                 
                 # Since these are in-scope course syllabus questions, they should match documents

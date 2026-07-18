@@ -73,10 +73,8 @@ class TestEnsembleRetriever(unittest.TestCase):
                     content_lower = doc.page_content.lower()
                     source_meta = doc.metadata.get("source", "").lower()
                     
-                    # Verify if the doc content contains any of the expected substrings
-                    has_content_match = any(sub in content_lower for sub in case["expected_substrings"])
-                    # Verify if the source metadata points to the correct document file
-                    has_source_match = case["source_file"].lower() in source_meta
+                    # Verify if the doc content contains all of the expected substrings
+                    has_content_match = all(sub in content_lower for sub in case["expected_substrings"])
                     
                     if has_content_match or has_source_match:
                         match_found = True

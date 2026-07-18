@@ -8,4 +8,3 @@ class OllamaFactory:
     @staticmethod
     def get_embeddings(model: str = "bge-m3", **kwargs) -> OllamaEmbeddings:
         return OllamaEmbeddings(model=model, **kwargs)
-
