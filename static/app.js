@@ -437,7 +437,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Extract sources
             const sources = (answerData.contexts || []).map(ctx => ({
                 name: ctx.metadata?.source || 'Documento',
-                page: ctx.metadata?.page || ''
+                page: ctx.metadata?.page_number || ''
             }));
 
             // 4. Render empty AI response bubble shell
@@ -546,7 +546,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Extract sources
             const sources = (data.contexts || []).map(ctx => ({
                 name: ctx.metadata?.source || 'Documento',
-                page: ctx.metadata?.page || ''
+                page: ctx.metadata?.page_number || ''
             }));
 
             // 4. Render empty AI response bubble structure
