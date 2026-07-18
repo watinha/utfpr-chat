@@ -9,7 +9,7 @@ from langchain_core.load import loads
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.globals import set_debug
 
-from vectorize_documents import build_ensemble_retriever
+from retrievers import build_ensemble_retriever
 
 
 #set_debug(True)

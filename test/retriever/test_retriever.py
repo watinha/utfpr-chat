@@ -1,7 +1,7 @@
 import os, sys, unittest, urllib.request
 
 from rag import rag_query
-from vectorize_documents import build_ensemble_retriever
+from retrievers import build_ensemble_retriever
 
 
 def is_ollama_available():
