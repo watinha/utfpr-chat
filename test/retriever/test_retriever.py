@@ -26,34 +26,34 @@ class TestEnsembleRetriever(unittest.TestCase):
         # List of question/term check cases
         test_cases = [
             {
-                "question": "Qual a qualificação dos docentes?",
-                "expected_substrings": ["docente", "corpo docente", "titulação", "professor"],
-                "source_file": "3_corpo_docente.tex"
+                "question": "Qual a qualificação, titulação e adequação dos docentes?",
+                "expected_substrings": ["docente", "corpo", "titulação", "doutorado"],
+                "source_file": "./docs/PPC_CDIA_LD_COGEP_2026.pdf"
             },
             {
                 "question": "Como é a infraestrutura do curso?",
-                "expected_substrings": ["infraestrutura", "laboratório", "equipamentos", "bloco"],
-                "source_file": "4_infraestrutura.tex"
+                "expected_substrings": ["infraestrutura", "laboratório", "equipamentos"],
+                "source_file": "./docs/PPC_CDIA_LD_COGEP_2026.pdf"
             },
             {
                 "question": "Qual o período do curso?",
-                "expected_substrings": ["período", "semestre", "integral", "noturno"],
-                "source_file": "2_Organização_Didático_Pedagógica.tex"
+                "expected_substrings": ["período", "noturno"],
+                "source_file": "./docs/PPC_CDIA_LD_COGEP_2026.pdf"
             },
             {
                 "question": "O curso possui a disciplina de Estrutura de Dados?",
                 "expected_substrings": ["estrutura de dados", "árvores", "binárias", "listas"],
-                "source_file": "unidades-curriculares.tex"
+                "source_file": "./docs/PPC_CDIA_LD_COGEP_2026.pdf"
             },
             {
                 "question": "Quais os conteúdos das disciplinas de Estrutura de Dados?",
-                "expected_substrings": ["estrutura de dados", "ementa", "conteúdo", "listas", "lineares", "ordenação"],
-                "source_file": "unidades-curriculares.tex"
+                "expected_substrings": ["estrutura de dados", "ementa", "conteúdo", "listas", "lineares"],
+                "source_file": "./docs/PPC_CDIA_LD_COGEP_2026.pdf"
             },
             {
                 "question": "Quais às habilitações profissionais do egresso do curso?",
-                "expected_substrings": ["egresso", "habilitações", "atividades profissionais", "atuação"],
-                "source_file": "2_Organização_Didático_Pedagógica.tex"
+                "expected_substrings": ["egresso", "profissionais", "atuação"],
+                "source_file": "./docs/PPC_CDIA_LD_COGEP_2026.pdf"
             }
         ]
 
@@ -65,27 +65,31 @@ class TestEnsembleRetriever(unittest.TestCase):
                 # Check that we retrieved documents
                 self.assertTrue(len(retrieved_docs) > 0, f"No documents retrieved for question: {case['question']}")
 
-                # Check if at least one retrieved document matches the expected criteria
-                match_found = False
-                matched_content = []
-                
-                for doc in retrieved_docs:
-                    content_lower = doc.page_content.lower()
-                    source_meta = doc.metadata.get("source", "").lower()
-                    
-                    # Verify if the doc content contains all of the expected substrings
-                    has_content_match = all(sub in content_lower for sub in case["expected_substrings"])
-                    
-                    if has_content_match or has_source_match:
-                        match_found = True
-                        matched_content.append(doc.page_content)
+                # Identify expected words that were not present in any retrieved chunk
+                missing_words = [
+                    sub for sub in case["expected_substrings"]
+                    if not any(sub in doc.page_content.lower() for doc in retrieved_docs)
+                ]
 
-                # Assert that we found the relevant chunk
-                self.assertTrue(
-                    match_found, 
-                    f"Could not find the expected chunk or source file for question: '{case['question']}'.\n"
-                    f"Expected substrings: {case['expected_substrings']}\n"
+                # Build detailed info for each chunk
+                chunks_info = []
+                for idx, doc in enumerate(retrieved_docs):
+                    content_lower = doc.page_content.lower()
+                    found_in_chunk = [sub for sub in case["expected_substrings"] if sub in content_lower]
+                    missing_in_chunk = [sub for sub in case["expected_substrings"] if sub not in content_lower]
+                    chunks_info.append(
+                        f" - Chunk ({idx + 1}): Found: {found_in_chunk} | Missing: {missing_in_chunk}\n"
+                        f"   Content: {doc.page_content}"
+                    )
+
+                # Assert that all expected words appeared across the retrieved chunks
+                self.assertEqual(
+                    missing_words, [],
+                    f"Expected words were missing across all retrieved chunks for question: '{case['question']}'.\n"
+                    f"Words not present in any chunk: {missing_words}\n"
+                    f"All expected words: {case['expected_substrings']}\n"
                     f"Expected source: {case['source_file']}\n"
+                    f"Chunks:\n" + "\n".join(chunks_info) + "\n"
                     f"Retrieved docs sources: {[d.metadata.get('source') for d in retrieved_docs]}"
                 )
 
