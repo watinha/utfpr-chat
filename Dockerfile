@@ -3,7 +3,7 @@ FROM ollama/ollama:latest
 
 # Install Python and pip
 RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y python3 python3-pip && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y python3 python3-pip ffmpeg libsm6 libxext6 && \
     rm -rf /var/lib/apt/lists/*
 
 # Install required Python packages
