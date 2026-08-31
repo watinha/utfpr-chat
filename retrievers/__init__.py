@@ -10,5 +10,7 @@ def build_ensemble_retriever(split_docs=[]):
     vector_retriever = VectorRetrieverBuilder.build(split_docs, embeddings)
     bm25_retriever = BM25RetrieverBuilder.build(split_docs)
     ensemble_retriever = EnsembleRetrieverBuilder.build([vector_retriever, bm25_retriever])
+    #multiquery_retriever = MultiQueryRetrieverBuilder.build(ensemble_retriever)
 
+    #return multiquery_retriever
     return ensemble_retriever

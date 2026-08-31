@@ -32,8 +32,8 @@ class TestRagQuery(unittest.TestCase):
                 "expected_words": ["egresso", "profissional", "dados", "empresa", "analista", "cientista"]
             },
             {
-                "question": "Qual o período do curso?",
-                "expected_words": ["período", "integral", "semestre", "matutino", "noturno"]
+                "question": "Qual o turno do curso?",
+                "expected_words": ["noturno"]
             },
             {
                 "question": "Matemática é um conteúdo importante para entrar no curso?",

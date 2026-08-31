@@ -13,4 +13,4 @@ class VectorRetrieverBuilder:
         else:
             vectorstore = FAISS.from_documents(split_docs, embeddings)
             vectorstore.save_local(store_path)
-        return vectorstore.as_retriever(search_kwargs={"k": 3})
+        return vectorstore.as_retriever(search_kwargs={"k": 2})

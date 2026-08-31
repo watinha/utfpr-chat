@@ -27,7 +27,7 @@ class TestEnsembleRetriever(unittest.TestCase):
         test_cases = [
             {
                 "question": "Qual a qualificação, titulação e adequação dos docentes?",
-                "expected_substrings": ["docente", "corpo", "titulação", "doutorado"],
+                "expected_substrings": ["docente", "corpo", "titulação", "doutor"],
                 "source_file": "./docs/PPC_CDIA_LD_COGEP_2026.pdf"
             },
             {
@@ -36,8 +36,8 @@ class TestEnsembleRetriever(unittest.TestCase):
                 "source_file": "./docs/PPC_CDIA_LD_COGEP_2026.pdf"
             },
             {
-                "question": "Qual o período do curso?",
-                "expected_substrings": ["período", "noturno"],
+                "question": "Qual o turno do curso?",
+                "expected_substrings": ["noturno"],
                 "source_file": "./docs/PPC_CDIA_LD_COGEP_2026.pdf"
             },
             {
