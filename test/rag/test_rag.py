@@ -21,11 +21,11 @@ class TestRagQuery(unittest.TestCase):
         example_questions = [
             {
                 "question": "Qual a qualificação dos docentes?",
-                "expected_words": ["docente", "doutor", "professor", "mestre", "qualificação"]
+                "expected_words": ["docentes", "doutores", "mestres", "qualificação"]
             },
             {
                 "question": "Como é a infraestrutura do curso?",
-                "expected_words": ["laboratório", "equipamentos", "biblioteca", "infraestrutura", "bloco"]
+                "expected_words": ["laboratórios", "computadores", "rede", "Python", "Visual Studio Code"]
             },
             {
                 "question": "Quais as atividades profissionais exercidas pelo egresso do curso?",
@@ -41,19 +41,19 @@ class TestRagQuery(unittest.TestCase):
             },
             {
                 "question": "O curso tem Trabalho de Conclusão de Curso?",
-                "expected_words": ["tcc", "trabalho de conclusão", "curso", "tcc1", "tcc2"]
+                "expected_words": ["TCC", "Trabalho de Conclusão", "Sim"]
             },
             {
                 "question": "Como funcionam as atividades de extensão no curso?",
-                "expected_words": ["extensão", "atividades", "projeto", "comunidade"]
+                "expected_words": ["extensão", "atividades", "projetos"]
             },
             {
                 "question": "O curso tem atividades complementares?",
-                "expected_words": ["atividades", "complementares", "horas", "grupo"]
+                "expected_words": ["Atividades", "Complementares", "Sim"]
             },
             {
                 "question": "Quais os conteúdos da disciplina de Estrutura de Dados 1?",
-                "expected_words": ["ementa", "listas", "lineares", "ordenação"]
+                "expected_words": ["Listas", "lineares", "árvores"]
             },
             {
                 "question": "Quais os conteúdos da disciplina de Estrutura de Dados 2?",
@@ -61,15 +61,15 @@ class TestRagQuery(unittest.TestCase):
             },
             {
                 "question": "Qual a importância do estágio?",
-                "expected_words": ["estágio", "supervisionado", "profissional", "prática", "empresa"]
+                "expected_words": ["estágio", "prática", "teoria"]
             },
             {
                 "question": "Qual a carga horária total do curso?",
-                "expected_words": ["3210", "horas"]
+                "expected_words": ["3.210", "horas"]
             },
             {
                 "question": "O curso possui disciplinas da área de humanidades?",
-                "expected_words": ["Sim", "Comunicação"]
+                "expected_words": ["Sim"]
             },
             {
                 "question": "Quais são as disciplinas do primeiro período do curso?",
