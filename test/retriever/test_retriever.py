@@ -54,6 +54,31 @@ class TestEnsembleRetriever(unittest.TestCase):
                 "question": "Quais às habilitações profissionais do egresso do curso?",
                 "expected_substrings": ["egresso", "profissionais", "atuação"],
                 "source_file": "./docs/PPC_CDIA_LD_COGEP_2026.pdf"
+            },
+            {
+                "question": "Como é a infraestrutura do curso?",
+                "expected_substrings": ["laboratórios", "computadores", "rede", "python", "visual studio code"],
+                "source_file": "./docs/PPC_CDIA_LD_COGEP_2026.pdf"
+            },
+            {
+                "question": "Quais as atividades profissionais exercidas pelo egresso do curso?",
+                "expected_substrings": ["modelar", "explorar", "soluções", "computacionais", "inteligência artificial"],
+                "source_file": "./docs/PPC_CDIA_LD_COGEP_2026.pdf"
+            },
+            {
+                "question": "Matemática é um conteúdo importante para entrar no curso?",
+                "expected_substrings": ["disciplina", "álgebra", "cálculo"],
+                "source_file": "./docs/PPC_CDIA_LD_COGEP_2026.pdf"
+            },
+            {
+                "question": "Quais os conteúdos da disciplina de Estrutura de Dados 1?",
+                "expected_substrings": ["listas", "lineares", "árvores"],
+                "source_file": "./docs/PPC_CDIA_LD_COGEP_2026.pdf"
+            },
+            {
+                "question": "Quais os conteúdos da disciplina de Estrutura de Dados 2?",
+                "expected_substrings": ["árvores", "binárias", "complexidade"],
+                "source_file": "./docs/PPC_CDIA_LD_COGEP_2026.pdf"
             }
         ]
 

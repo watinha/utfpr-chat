@@ -3,7 +3,7 @@ from langchain_community.document_loaders import UnstructuredPDFLoader
 from retrievers import build_ensemble_retriever
 
 CHUNK_SIZE = 2000
-CHUNK_OVERLAP = 500
+CHUNK_OVERLAP = 750
 
 def load_and_split_documents(pdf_dir: str = './docs'):
     if not os.path.exists(pdf_dir):
