@@ -7,8 +7,8 @@ from llms import OllamaFactory
 from langchain_core.prompts import PromptTemplate
 
 
-CHUNK_SIZE = 1000
-CHUNK_OVERLAP = 300
+CHUNK_SIZE = 2000
+CHUNK_OVERLAP = 1000
 SAMPLE_SECTION_SIZE = 4000
 SAMPLE_CHUNK_SIZE = CHUNK_SIZE
 
