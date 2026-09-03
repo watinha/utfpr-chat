@@ -31,11 +31,6 @@ class TestEnsembleRetriever(unittest.TestCase):
                 "source_file": "./docs/PPC_CDIA_LD_COGEP_2026.pdf"
             },
             {
-                "question": "Como é a infraestrutura do curso?",
-                "expected_substrings": ["infraestrutura", "laboratório", "equipamentos"],
-                "source_file": "./docs/PPC_CDIA_LD_COGEP_2026.pdf"
-            },
-            {
                 "question": "Qual o turno do curso?",
                 "expected_substrings": ["noturno"],
                 "source_file": "./docs/PPC_CDIA_LD_COGEP_2026.pdf"

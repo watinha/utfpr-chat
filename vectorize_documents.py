@@ -1,11 +1,16 @@
 import os
+
+
 from langchain_community.document_loaders import UnstructuredPDFLoader
 from retrievers import build_ensemble_retriever
 from llms import OllamaFactory
 from langchain_core.prompts import PromptTemplate
 
-CHUNK_SIZE = 2000
-CHUNK_OVERLAP = 750
+
+CHUNK_SIZE = 1000
+CHUNK_OVERLAP = 300
+SAMPLE_SECTION_SIZE = 4000
+SAMPLE_CHUNK_SIZE = CHUNK_SIZE
 
 TABLE_SUMMARY_PROMPT = PromptTemplate(
     input_variables=["table_content"],
@@ -19,11 +24,12 @@ TABLE_SUMMARY_PROMPT = PromptTemplate(
 )
 
 CHUNK_CONTEXT_PROMPT = PromptTemplate(
-    input_variables=["doc_title", "section_path", "chunk_content"],
+    input_variables=["doc_title", "section_path", "section_content", "chunk_content"],
     template=(
-        "Aqui está um trecho de um documento na seção '{section_path}' do documento '{doc_title}'.\n"
-        "Escreva um parágrafo curto (2-3 frases) contextualizando sobre o que trata este trecho no âmbito da seção e do documento:\n\n"
-        "Trecho:\n{chunk_content}\n\n"
+        "Aqui está um trecho de um documento na seção '{section_path}' do documento '{doc_title}'.\n\n"
+        "Conteúdo completo da seção:\n{section_content}\n\n"
+        "Trecho a ser contextualizado:\n{chunk_content}\n\n"
+        "Escreva um parágrafo curto (2-3 frases) contextualizando o trecho acima no âmbito do conteúdo completo da seção e do documento:\n\n"
         "Parágrafo de Contexto:"
     )
 )
@@ -43,16 +49,18 @@ def summarize_table(table_content: str, llm) -> str:
         print(f"Erro ao gerar resumo da tabela com LLM: {e}")
         return ""
 
-def generate_chunk_context(doc_title: str, section_path: str, chunk_content: str, llm) -> str:
-    """Gera uma descrição em parágrafo do contexto de um chunk usando o LLM."""
+def generate_chunk_context(doc_title: str, section_path: str, section_content: str, chunk_content: str, llm) -> str:
+    """Gera uma descrição em parágrafo do contexto de um chunk utilizando o conteúdo completo da seção."""
     if not chunk_content or len(chunk_content.strip()) < 15:
         return ""
     
-    sample_content = chunk_content[:1500]
+    sample_section = section_content[:SAMPLE_SECTION_SIZE]
+    sample_chunk = chunk_content[:SAMPLE_CHUNK_SIZE]
     prompt = CHUNK_CONTEXT_PROMPT.format(
         doc_title=doc_title,
         section_path=section_path,
-        chunk_content=sample_content
+        section_content=sample_section,
+        chunk_content=sample_chunk
     )
     try:
         response = llm.invoke(prompt)
@@ -62,6 +70,7 @@ def generate_chunk_context(doc_title: str, section_path: str, chunk_content: str
     except Exception as e:
         print(f"Erro ao gerar descrição de contexto do chunk com LLM: {e}")
         return ""
+
 
 def process_table_documents(docs, llm):
     """Identifica elementos de tabelas, gera resumos usando o LLM e atualiza os documentos."""
@@ -94,20 +103,20 @@ def process_table_documents(docs, llm):
 def apply_contextual_chunking(docs, llm, document_title: str = ""):
     """
     Enriquece cada chunk de documento com o contexto da seção em que está inserido
-    e uma descrição em parágrafo gerada por LLM (Contextual Chunking).
+    e uma descrição em parágrafo gerada por LLM utilizando o conteúdo completo da seção.
     """
-    processed_docs = []
+    doc_section_info = []
+    section_chunks = {}
     current_section_stack = []
     
+    # Passo 1: Determina o caminho da seção para cada chunk e agrupa o conteúdo completo de cada seção
     for doc in docs:
         category = str(doc.metadata.get("category", "")).lower()
         element_type = str(doc.metadata.get("element_type", "")).lower()
         content = doc.page_content.strip()
         
-        # Verifica se o Unstructured já forneceu lista de seções nos metadados
         unstructured_sections = doc.metadata.get("sections") or doc.metadata.get("section")
         
-        # Atualiza a pilha de seções se o elemento for um Título/Cabeçalho
         if (category in ("title", "header") or "title" in element_type or "header" in element_type) and content:
             if len(content) < 300:
                 category_depth = doc.metadata.get("category_depth", 0)
@@ -120,7 +129,6 @@ def apply_contextual_chunking(docs, llm, document_title: str = ""):
                     else:
                         current_section_stack.append(content)
         
-        # Constrói o caminho da seção
         if unstructured_sections:
             if isinstance(unstructured_sections, list):
                 section_path = " > ".join([str(s) for s in unstructured_sections if str(s).strip()])
@@ -135,23 +143,37 @@ def apply_contextual_chunking(docs, llm, document_title: str = ""):
         else:
             section_path = "Geral"
             
-        doc_label = document_title if document_title else "Documento PDF"
+        doc_section_info.append((doc, section_path))
         
-        # Gera descrição do contexto em parágrafo via LLM
+        if section_path not in section_chunks:
+            section_chunks[section_path] = []
+        section_chunks[section_path].append(doc.page_content)
+        
+    # Constrói o texto completo de cada seção
+    complete_section_contents = {
+        sec_path: "\n\n".join(chunks) for sec_path, chunks in section_chunks.items()
+    }
+    
+    # Passo 2: Gera a descrição contextual para cada chunk utilizando o conteúdo completo da seção
+    processed_docs = []
+    doc_label = document_title if document_title else "Documento PDF"
+    
+    for doc, section_path in doc_section_info:
+        full_section_text = complete_section_contents.get(section_path, "")
+        
         context_paragraph = generate_chunk_context(
             doc_title=doc_label,
             section_path=section_path,
+            section_content=full_section_text,
             chunk_content=doc.page_content,
             llm=llm
         )
         
-        # Armazena metadados
         doc.metadata["section"] = section_path
         doc.metadata["section_context"] = f"Documento: {doc_label} | Seção: {section_path}"
         if context_paragraph:
             doc.metadata["context_paragraph"] = context_paragraph
             
-        # Formata o conteúdo do chunk preapendando o contexto e a descrição gerada pelo LLM
         context_prefix = f"CONTEXTO DA SEÇÃO: [Documento: {doc_label} | Seção: {section_path}]"
         if context_paragraph:
             context_prefix += f"\nDESCRIÇÃO DO CONTEXTO: {context_paragraph}"
@@ -160,6 +182,7 @@ def apply_contextual_chunking(docs, llm, document_title: str = ""):
         processed_docs.append(doc)
         
     return processed_docs
+
 
 def load_and_split_documents(pdf_dir: str = './docs'):
     if not os.path.exists(pdf_dir):
