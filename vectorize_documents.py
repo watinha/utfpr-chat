@@ -92,8 +92,6 @@ def process_table_documents(docs, llm):
             summary = summarize_table(table_content, llm)
             
             full_table_data = f"{raw_content}"
-            else:
-                full_table_data = table_content
             
             if summary:
                 print(f"[Resumo da Tabela Gerado]: {summary[:120]}...")
@@ -221,8 +219,8 @@ def load_and_split_documents(pdf_dir: str = './docs'):
             languages=["pt"]
         )
         docs = loader.load()
-        docs = process_table_documents(docs, llm)
-        docs = apply_contextual_chunking(docs, llm, document_title=filename)
+        #docs = process_table_documents(docs, llm)
+        #docs = apply_contextual_chunking(docs, llm, document_title=filename)
         all_docs.extend(docs)
         
     return all_docs
