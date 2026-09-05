@@ -1,9 +1,18 @@
 # Use Ollama base image
 FROM ollama/ollama:latest
 
-# Install Python and pip
+# Install Python, pip, Tesseract OCR and Poppler dependencies
 RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y python3 python3-pip ffmpeg libsm6 libxext6 && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+        python3 \
+        python3-pip \
+        ffmpeg \
+        libsm6 \
+        libxext6 \
+        poppler-utils \
+        tesseract-ocr \
+        tesseract-ocr-por \
+        tesseract-ocr-eng && \
     rm -rf /var/lib/apt/lists/*
 
 # Install required Python packages

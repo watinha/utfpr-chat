@@ -1,23 +1,22 @@
 import os
 
-
 from langchain_community.document_loaders import UnstructuredPDFLoader
 from retrievers import build_ensemble_retriever
 from llms import OllamaFactory
 from langchain_core.prompts import PromptTemplate
 
-
 CHUNK_SIZE = 2000
-CHUNK_OVERLAP = 1000
+CHUNK_OVERLAP = 500
 SAMPLE_SECTION_SIZE = 4000
 SAMPLE_CHUNK_SIZE = CHUNK_SIZE
+MIN_CHUNK_LEN_FOR_LLM_CONTEXT = 150
 
 TABLE_SUMMARY_PROMPT = PromptTemplate(
     input_variables=["table_content"],
     template=(
         "Você é um assistente especialista em análise de documentos.\n"
         "Analise a seguinte tabela extraída de um PDF e gere um resumo claro, conciso e estruturado "
-        "destacando as principais informações, colunas, métricas e dados relevantes:\n\n"
+        "destacando os principais dados e informações:\n\n"
         "Tabela:\n{table_content}\n\n"
         "Resumo:"
     )
@@ -51,7 +50,7 @@ def summarize_table(table_content: str, llm) -> str:
 
 def generate_chunk_context(doc_title: str, section_path: str, section_content: str, chunk_content: str, llm) -> str:
     """Gera uma descrição em parágrafo do contexto de um chunk utilizando o conteúdo completo da seção."""
-    if not chunk_content or len(chunk_content.strip()) < 15:
+    if not chunk_content or len(chunk_content.strip()) < MIN_CHUNK_LEN_FOR_LLM_CONTEXT:
         return ""
     
     sample_section = section_content[:SAMPLE_SECTION_SIZE]
@@ -71,9 +70,8 @@ def generate_chunk_context(doc_title: str, section_path: str, section_content: s
         print(f"Erro ao gerar descrição de contexto do chunk com LLM: {e}")
         return ""
 
-
 def process_table_documents(docs, llm):
-    """Identifica elementos de tabelas, gera resumos usando o LLM e atualiza os documentos."""
+    """Identifica elementos de tabelas, gera resumos usando o LLM e preserva os dados completos da tabela (HTML e Texto)."""
     processed_docs = []
     
     for doc in docs:
@@ -82,23 +80,35 @@ def process_table_documents(docs, llm):
         is_table = category == "table" or "table" in element_type
         
         if is_table:
-            print(f"[Tabela Identificada] Documento: {doc.metadata.get('filename', '')} | Página: {doc.metadata.get('page_number', 'N/A')}")
-            table_content = doc.metadata.get("text_as_html") or doc.page_content
+            page_num = doc.metadata.get('page_number', 'N/A')
+            filename = doc.metadata.get('filename', '')
+            print(f"[Tabela Identificada] Documento: {filename} | Página: {page_num}")
+            
+            html_content = doc.metadata.get("text_as_html")
+            raw_content = doc.page_content
+            
+            # Utiliza HTML para estruturação visual da tabela se disponível
+            table_content = html_content if html_content else raw_content
             summary = summarize_table(table_content, llm)
+            
+            full_table_data = f"{raw_content}"
+            else:
+                full_table_data = table_content
             
             if summary:
                 print(f"[Resumo da Tabela Gerado]: {summary[:120]}...")
                 doc.page_content = (
                     f"RESUMO DA TABELA:\n{summary}\n\n"
-                    f"DADOS DA TABELA:\n{doc.page_content}"
+                    f"DADOS COMPLETOS DA TABELA:\n{full_table_data}"
                 )
                 doc.metadata["is_table"] = True
                 doc.metadata["table_summary"] = summary
+            else:
+                doc.page_content = f"DADOS COMPLETOS DA TABELA:\n{full_table_data}"
         
         processed_docs.append(doc)
         
     return processed_docs
-
 
 def apply_contextual_chunking(docs, llm, document_title: str = ""):
     """
@@ -161,28 +171,31 @@ def apply_contextual_chunking(docs, llm, document_title: str = ""):
     for doc, section_path in doc_section_info:
         full_section_text = complete_section_contents.get(section_path, "")
         
-        context_paragraph = generate_chunk_context(
-            doc_title=doc_label,
-            section_path=section_path,
-            section_content=full_section_text,
-            chunk_content=doc.page_content,
-            llm=llm
-        )
+        # Gera descrição do contexto em parágrafo via LLM apenas para chunks com conteúdo substancial e não-tabelas
+        context_paragraph = ""
+        if len(doc.page_content.strip()) >= MIN_CHUNK_LEN_FOR_LLM_CONTEXT and not doc.metadata.get("is_table"):
+            context_paragraph = generate_chunk_context(
+                doc_title=doc_label,
+                section_path=section_path,
+                section_content=full_section_text,
+                chunk_content=doc.page_content,
+                llm=llm
+            )
         
         doc.metadata["section"] = section_path
         doc.metadata["section_context"] = f"Documento: {doc_label} | Seção: {section_path}"
         if context_paragraph:
             doc.metadata["context_paragraph"] = context_paragraph
             
-        context_prefix = f"CONTEXTO DA SEÇÃO: [Documento: {doc_label} | Seção: {section_path}]"
+        context_prefix = f"CONTEXTO DA SEÇÃO: [{doc_label} > {section_path}]"
         if context_paragraph:
-            context_prefix += f"\nDESCRIÇÃO DO CONTEXTO: {context_paragraph}"
+            doc.page_content = f"{context_prefix}\nDESCRIÇÃO DO CONTEXTO: {context_paragraph}\n\n--- CONTEÚDO INTEGRAL DO CHUNK ---\n{doc.page_content}"
+        else:
+            doc.page_content = f"{context_prefix}\n\n--- CONTEÚDO INTEGRAL DO CHUNK ---\n{doc.page_content}"
             
-        doc.page_content = f"{context_prefix}\n\nCONTEÚDO:\n{doc.page_content}"
         processed_docs.append(doc)
         
     return processed_docs
-
 
 def load_and_split_documents(pdf_dir: str = './docs'):
     if not os.path.exists(pdf_dir):
@@ -199,9 +212,12 @@ def load_and_split_documents(pdf_dir: str = './docs'):
         loader = UnstructuredPDFLoader(
             file_path, 
             mode="elements",
+            strategy="hi_res",
+            infer_table_structure=True,
             chunking_strategy="by_title",
             max_characters=CHUNK_SIZE,
             overlap=CHUNK_OVERLAP,
+            combine_under_n_chars=500,
             languages=["pt"]
         )
         docs = loader.load()
@@ -214,5 +230,6 @@ def load_and_split_documents(pdf_dir: str = './docs'):
 if __name__ == "__main__":
     split_docs = load_and_split_documents()
     build_ensemble_retriever(split_docs)
+
 
 
