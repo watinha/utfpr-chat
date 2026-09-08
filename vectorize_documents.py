@@ -27,12 +27,11 @@ def load_and_split_documents(pdf_dir: str = './docs'):
             chunking_strategy="by_title",
             max_characters=CHUNK_SIZE,
             overlap=CHUNK_OVERLAP,
-            combine_under_n_chars=500,
             languages=["pt"]
         )
         docs = loader.load()
         docs = process_table_documents(docs, llm)
-        docs = apply_contextual_chunking(docs, llm, document_title=filename)
+        docs = apply_contextual_chunking(docs, llm, document_title=filename, chunk_size=CHUNK_SIZE)
         all_docs.extend(docs)
         
     return all_docs
