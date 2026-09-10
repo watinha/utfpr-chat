@@ -1,4 +1,5 @@
 import os
+import json
 from langchain_community.document_loaders import UnstructuredPDFLoader
 from retrievers import build_ensemble_retriever
 from llms import OllamaFactory
@@ -6,6 +7,22 @@ from chunking import process_table_documents, apply_contextual_chunking
 
 CHUNK_SIZE = 2000
 CHUNK_OVERLAP = 500
+
+def save_chunks_to_json(docs, cache_path: str = './retrievers/cache/chunks.json'):
+    os.makedirs(os.path.dirname(cache_path), exist_ok=True)
+    serialized_docs = [
+        {
+            "page_content": doc.page_content,
+            "metadata": {
+                k: v if isinstance(v, (str, int, float, bool, list, dict, type(None))) else str(v)
+                for k, v in (doc.metadata or {}).items()
+            }
+        }
+        for doc in docs
+    ]
+    with open(cache_path, 'w', encoding='utf-8') as f:
+        json.dump(serialized_docs, f, ensure_ascii=False, indent=2, default=str)
+    print(f"Chunks salvos com sucesso em: {cache_path}")
 
 def load_and_split_documents(pdf_dir: str = './docs'):
     if not os.path.exists(pdf_dir):
@@ -24,7 +41,6 @@ def load_and_split_documents(pdf_dir: str = './docs'):
             mode="elements",
             strategy="hi_res",
             infer_table_structure=True,
-            chunking_strategy="by_title",
             max_characters=CHUNK_SIZE,
             overlap=CHUNK_OVERLAP,
             languages=["pt"]
@@ -34,6 +50,7 @@ def load_and_split_documents(pdf_dir: str = './docs'):
         docs = apply_contextual_chunking(docs, llm, document_title=filename, chunk_size=CHUNK_SIZE)
         all_docs.extend(docs)
         
+    save_chunks_to_json(all_docs)
     return all_docs
 
 if __name__ == "__main__":

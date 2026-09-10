@@ -4,7 +4,8 @@ TABLE_SUMMARY_PROMPT = PromptTemplate(
     input_variables=["table_content"],
     template=(
         "Você é um assistente especialista em análise de documentos.\n"
-        "Analise a seguinte tabela extraída de um PDF e gere um resumo claro, conciso e estruturado "
+        "Analise a seguinte tabela extraída de um PDF e gere um resumo claro, "
+        "conciso e estruturado, "
         "destacando os principais dados e informações:\n\n"
         "Tabela:\n{table_content}\n\n"
         "Resumo:"
@@ -47,7 +48,8 @@ def process_table_documents(docs, llm):
             summary = summarize_table(table_content, llm)
             
             if html_content and html_content != raw_content:
-                full_table_data = f"ESTRUTURA HTML DA TABELA:\n{html_content}\n\nTEXTO DA TABELA:\n{raw_content}"
+                #full_table_data = f"ESTRUTURA HTML DA TABELA:\n{html_content}\n\nTEXTO DA TABELA:\n{raw_content}"
+                full_table_data = f"{raw_content}"
             else:
                 full_table_data = table_content
             

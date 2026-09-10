@@ -8,11 +8,17 @@ MIN_CHUNK_LEN_FOR_LLM_CONTEXT = 150
 CHUNK_CONTEXT_PROMPT = PromptTemplate(
     input_variables=["doc_title", "section_path", "section_content", "chunk_content"],
     template=(
-        "Aqui está um trecho de um documento inserido na subseção/seção específica '{section_path}' do documento '{doc_title}'.\n\n"
-        "Conteúdo da subseção/seção:\n{section_content}\n\n"
+        "Você é um especialista em recuperação de informação e contextualização de documentos.\n\n"
+        "Documento: {doc_title}\n"
+        "Seção: {section_path}\n\n"
+        "Conteúdo da seção:\n{section_content}\n\n"
         "Trecho a ser contextualizado:\n{chunk_content}\n\n"
-        "Escreva um parágrafo curto (2-3 frases) contextualizando exatamente sobre o que trata este trecho específico no âmbito desta subseção e do documento:\n\n"
-        "Parágrafo de Contexto:"
+        "Instruções:\n"
+        "- NÃO faça apenas um resumo do conteúdo do trecho.\n"
+        "- Explique diretamente como este trecho se conecta e contribui para os conceitos, temas e objetivos da seção '{section_path}'.\n"
+        "- Destaque o papel que essas informações desempenham no escopo geral desta seção e do documento '{doc_title}'.\n"
+        "- Escreva um parágrafo conciso (2 a 3 frases) focado exclusivamente nessa relação contextual.\n\n"
+        "Contexto:"
     )
 )
 
@@ -41,12 +47,20 @@ def remove_header_documents(docs):
         if str((doc.metadata or {}).get("category", "") or "").strip().lower() != "header"
     ]
 
+def remove_title_documents(docs):
+    """Remove da lista os documentos que possuem a categoria 'Title'."""
+    return [
+        doc for doc in docs
+        if str((doc.metadata or {}).get("category", "") or "").strip().lower() != "title"
+    ]
+
+
 def join_chunks_by_size(docs, chunk_size: int = SAMPLE_CHUNK_SIZE):
     """
     Gera uma nova lista de documentos unindo chunks sequencialmente até que
     o tamanho especificado (chunk_size) seja alcançado.
-    Chunks com a categoria 'Title' não são unidos a outros chunks, mas são
-    mantidos individualmente na lista final de documentos.
+    Documentos que são tabelas ou possuem a categoria 'Title' não são unidos a
+    outros chunks, sendo mantidos individualmente na lista final de documentos.
     """
     if not docs:
         return []
@@ -69,9 +83,12 @@ def join_chunks_by_size(docs, chunk_size: int = SAMPLE_CHUNK_SIZE):
         current_length = 0
 
     for doc in docs:
-        category = str((doc.metadata or {}).get("category", "") or "").strip().lower()
-        # Chunks com categoria Title permanecem na lista, mas individuais (sem junção)
-        if category == "title":
+        metadata = doc.metadata or {}
+        category = str(metadata.get("category", "") or "").strip().lower()
+        is_table = bool(metadata.get("is_table")) or category == "table" or "table" in str(metadata.get("element_type", "")).lower()
+
+        # Chunks com categoria Title ou Tabelas permanecem na lista, mas individuais (sem junção)
+        if category == "title" or is_table:
             flush_current()
             new_docs.append(doc)
             continue
@@ -146,6 +163,7 @@ def apply_contextual_chunking(docs, llm, document_title: str = "", chunk_size: i
             process_section(current_title_doc, current_section_name, current_section_docs)
             current_title_doc = doc
             current_section_name = doc.page_content.strip() or "Geral"
+            print(f'Section found: {current_section_name}')
             current_section_docs = []
         else:
             current_section_docs.append(doc)
@@ -153,7 +171,7 @@ def apply_contextual_chunking(docs, llm, document_title: str = "", chunk_size: i
     # Processa os chunks da última seção
     process_section(current_title_doc, current_section_name, current_section_docs)
 
-    return processed_docs
+    return remove_title_documents(processed_docs)
 
 
 
