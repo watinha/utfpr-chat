@@ -5,8 +5,8 @@ from retrievers import build_ensemble_retriever
 from llms import OllamaFactory
 from chunking import process_table_documents, apply_contextual_chunking
 
-CHUNK_SIZE = 2000
-CHUNK_OVERLAP = 500
+CHUNK_SIZE = 1000
+CHUNK_OVERLAP = 300
 
 def save_chunks_to_json(docs, cache_path: str = './retrievers/cache/chunks.json'):
     os.makedirs(os.path.dirname(cache_path), exist_ok=True)
