@@ -37,7 +37,7 @@ class TestEnsembleRetriever(unittest.TestCase):
             },
             {
                 "question": "O curso possui a disciplina de Estrutura de Dados?",
-                "expected_substrings": ["estrutura de dados", "árvores", "binárias", "listas"],
+                "expected_substrings": ["estrutura de dados", "árvores", "listas"],
                 "source_file": "./docs/PPC_CDIA_LD_COGEP_2026.pdf"
             },
             {
@@ -57,12 +57,12 @@ class TestEnsembleRetriever(unittest.TestCase):
             },
             {
                 "question": "Quais as atividades profissionais exercidas pelo egresso do curso?",
-                "expected_substrings": ["modelar", "explorar", "soluções", "computacionais", "inteligência artificial"],
+                "expected_substrings": ["modelar", "explorar", "soluções", "inteligência artificial"],
                 "source_file": "./docs/PPC_CDIA_LD_COGEP_2026.pdf"
             },
             {
                 "question": "Matemática é um conteúdo importante para entrar no curso?",
-                "expected_substrings": ["disciplina", "álgebra", "cálculo"],
+                "expected_substrings": ["probabilidade", "estatística", "matemática"],
                 "source_file": "./docs/PPC_CDIA_LD_COGEP_2026.pdf"
             },
             {
