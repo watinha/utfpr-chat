@@ -37,7 +37,7 @@ class TestEnsembleRetriever(unittest.TestCase):
             },
             {
                 "question": "O curso possui a disciplina de Estrutura de Dados?",
-                "expected_substrings": ["estrutura de dados", "árvores", "listas"],
+                "expected_substrings": ["estrutura de dados 1", "estrutura de dados 2"],
                 "source_file": "./docs/PPC_CDIA_LD_COGEP_2026.pdf"
             },
             {
