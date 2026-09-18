@@ -54,5 +54,12 @@ def load_and_split_documents(pdf_dir: str = './docs'):
     return all_docs
 
 if __name__ == "__main__":
-    split_docs = load_and_split_documents()
-    build_ensemble_retriever(split_docs)
+    chunks_cache_path = './retrievers/cache/chunks.json'
+    if os.path.exists(chunks_cache_path):
+        print(f"O arquivo de cache '{chunks_cache_path}' já existe. O índice já foi construído, encerrando o script.")
+    else:
+        split_docs = load_and_split_documents()
+        build_ensemble_retriever(split_docs)
+
+
+
