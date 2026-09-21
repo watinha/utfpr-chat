@@ -65,6 +65,26 @@ function createEmptyAiResponseHtml() {
 }
 
 /**
+ * Toggles the visibility of the sources list block when clicking the expand link.
+ * @param {HTMLElement} linkElement The link element that was clicked.
+ */
+function toggleSources(linkElement) {
+    const sourcesBlock = linkElement.closest('.sources-block');
+    if (!sourcesBlock) return;
+    const sourcesList = sourcesBlock.querySelector('.sources-list');
+    const toggleIcon = linkElement.querySelector('.toggle-icon');
+    if (!sourcesList) return;
+
+    if (sourcesList.style.display === 'none' || getComputedStyle(sourcesList).display === 'none') {
+        sourcesList.style.display = 'flex';
+        if (toggleIcon) toggleIcon.textContent = '▲';
+    } else {
+        sourcesList.style.display = 'none';
+        if (toggleIcon) toggleIcon.textContent = '▼';
+    }
+}
+
+/**
  * Types out the AI response word-by-word with markdown rendering on the fly.
  * @param {HTMLElement} bubbleElement The bubble element where text is rendered.
  * @param {string} fullText The complete answer text.
@@ -102,12 +122,15 @@ async function typeResponse(bubbleElement, fullText, sources, chatMessages) {
         const sourcesHtml = `
             <div class="sources-block">
                 <div class="sources-title">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
-                    </svg>
-                    Fontes Consultadas
+                    <a href="#" class="sources-toggle-link" onclick="toggleSources(this); return false;" style="color: var(--accent-color); text-decoration: none; display: flex; align-items: center; gap: 0.25rem;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
+                        </svg>
+                        <span>Fontes Consultadas (clique para expandir)</span>
+                        <span class="toggle-icon">▼</span>
+                    </a>
                 </div>
-                <div class="sources-list">
+                <div class="sources-list" style="display: none; margin-top: 0.5rem;">
                     ${sourceTags}
                 </div>
             </div>`;
@@ -220,9 +243,9 @@ function handleAdditionalContent(question, aiBubbleElement, chatMessages) {
     let shouldGetInvitation = false;
     let shouldGetJoke = false;
 
-    if (rand < 0.2) {
+    if (rand < 0.3) {
         shouldGetInvitation = true;
-    } else if (rand < 0.4) {
+    } else if (rand < 0.6) {
         shouldGetJoke = true;
     }
 
