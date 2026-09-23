@@ -4,7 +4,7 @@ from langchain_community.retrievers import BM25Retriever
 
 class BM25RetrieverBuilder:
     @staticmethod
-    def build(split_docs, cache_path: str = './retrievers/cache/bm25_retriever.pkl'):
+    def build(split_docs, cache_path: str = './retrievers/cache/bm25_retriever.pkl', k: int = 3):
         cache_dir = os.path.dirname(cache_path)
         if cache_dir:
             os.makedirs(cache_dir, exist_ok=True)
@@ -16,5 +16,5 @@ class BM25RetrieverBuilder:
             bm25_retriever = BM25Retriever.from_documents(split_docs)
             with open(cache_path, 'wb') as f:
                 pickle.dump(bm25_retriever, f)
-        bm25_retriever.k = 3
+        bm25_retriever.k = k
         return bm25_retriever

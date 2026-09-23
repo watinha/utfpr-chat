@@ -3,7 +3,7 @@ from langchain_community.vectorstores import FAISS
 
 class VectorRetrieverBuilder:
     @staticmethod
-    def build(split_docs, embeddings, store_path: str = './retrievers/cache/faiss_index'):
+    def build(split_docs, embeddings, store_path: str = './retrievers/cache/faiss_index', k: int = 3):
         store_dir = os.path.dirname(store_path)
         if store_dir:
             os.makedirs(store_dir, exist_ok=True)
@@ -13,4 +13,4 @@ class VectorRetrieverBuilder:
         else:
             vectorstore = FAISS.from_documents(split_docs, embeddings)
             vectorstore.save_local(store_path)
-        return vectorstore.as_retriever(search_kwargs={"k": 3})
+        return vectorstore.as_retriever(search_kwargs={"k": k})
