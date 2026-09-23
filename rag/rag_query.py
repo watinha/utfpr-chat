@@ -21,7 +21,7 @@ ENV = os.getenv("ENV", "development")
 model = "llama3.1:8b" if ENV.lower() == "production" else "llama3.2:3b"
 
 # Initialize Ollama LLM via factory
-llm = OllamaFactory.get_llm(model=model, temperature=0.7)
+llm = OllamaFactory.get_llm(model=model, temperature=0.5)
 
 # Locate rag_prompt.txt relative to this module
 current_dir = os.path.dirname(os.path.abspath(__file__))
