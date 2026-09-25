@@ -10,7 +10,7 @@ model = "llama3.1:8b" if ENV.lower() == "production" else "llama3.2:3b"
 
 def make_joke(question):
     llm = OllamaFactory.get_llm(model=model, temperature=0.7)
-    system_prompt = f"Generate a joke about: {question}"
+    system_prompt = f"Gere uma piada considerando a pergunta passada pelo usuário. A piada deve ter no máximo 50 palavras."
 
     prompt = ChatPromptTemplate.from_messages([
         ("system", system_prompt),
