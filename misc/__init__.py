@@ -24,7 +24,7 @@ def make_joke(question):
 
 def make_invitation(response):
     llm = OllamaFactory.get_llm(model=model, temperature=0.7)
-    system_prompt = "Você é um assistente acadêmico. Com base nas informações da resposta fornecida, escreva um convite simples e objetivo (máximo de 50 palavras) para o estudante ingressar no curso de Bacharelado em Ciência de Dados e Inteligência Artificial da nossa universidade, para aprender mais sobre a área."
+    system_prompt = "Você é um assistente acadêmico. Com base nas informações da resposta fornecida, escreva um convite simples e objetivo (máximo de 50 palavras) para o estudante ingressar no curso de Sistemas de Informação da nossa universidade, para aprender mais sobre a área."
 
     prompt = ChatPromptTemplate.from_messages([
         ("system", system_prompt),
