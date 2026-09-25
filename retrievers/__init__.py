@@ -8,7 +8,7 @@ from .ensemble_retriever import EnsembleRetrieverBuilder
 from .multiquery_retriever import MultiQueryRetrieverBuilder
 
 ENV = os.getenv("ENV", "development")
-k = 5 if ENV.lower() == "production" else 3
+k = 3 if ENV.lower() == "production" else 3
 
 def build_ensemble_retriever(split_docs=[]):
     embeddings = OllamaFactory.get_embeddings(model="bge-m3")
