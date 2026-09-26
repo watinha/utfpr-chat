@@ -90,14 +90,14 @@ def rag_query(question: str):
     # Perform Semantic Routing check
     in_scope = semantic_routing_check(question, docs)
 
-    if not in_scope:
-        prompt_out = ChatPromptTemplate.from_messages([
-            ("system", prompt_data["out_of_scope"]),
-            ("user", "{pergunta}")
-        ])
-        chain = prompt_out | llm | StrOutputParser()
-        resposta = chain.invoke({"pergunta": question})
-        return resposta, []
+    #if not in_scope:
+    #    prompt_out = ChatPromptTemplate.from_messages([
+    #        ("system", prompt_data["out_of_scope"]),
+    #        ("user", "{pergunta}")
+    #    ])
+    #    chain = prompt_out | llm | StrOutputParser()
+    #    resposta = chain.invoke({"pergunta": question})
+    #    return resposta, []
 
     # Generate answer using document chain
     result_answer = doc_chain.invoke({"input": question, "context": docs})
